@@ -7,17 +7,45 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{
-  background:#ffffff;
+  background:#f5f1ea;
 }
-body{
-  display:flex;
-  justify-content:center;
-  padding:20px 0;
+/* 和行程页、leehan2完全一致的外层page规则 */
+@media (max-width:767px) {
+  html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+  }
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .page{
+    position:relative;
+    width:100%;
+    aspect-ratio: 960 / 1707;
+    overflow:hidden;
+  }
 }
-.canvas{
-  position:relative;
+@media (min-width:768px) {
+  html,body{
+    overflow-y:auto;
+  }
+  .page{
+    position:relative;
+    width:480px;
+    margin:30px auto;
+    height: calc(480px * 1707 / 960);
+    overflow:hidden;
+  }
+}
+/* 内层固定画布，所有px定位基准在这里，完全不变 */
+.inner-canvas{
+  position:absolute;
   width:960px;
   height:1707px;
+  transform-origin: top left;
 }
 .bg{
   width:960px;
@@ -104,36 +132,39 @@ body{
   left:520px;
   width:360px;
 }
-
-@media (max-width: 540px) {
-  .canvas{
-    transform-origin: top center;
-    transform: scale(calc(100vw / 960));
-  }
-  body{
-    padding:0;
-  }
-}
 </style>
 </head>
 <body>
-<div class="canvas">
-  <img class="bg" src="bg.webp" alt="bg">
+<div class="page">
+  <div class="inner-canvas" id="canvas">
+    <img class="bg" src="bg.webp" alt="bg">
 
-  <div class="name-title-wrap">
-    <img class="sticker" id="title" src="titel.webp" alt="Leehan">
+    <div class="name-title-wrap">
+      <img class="sticker" id="title" src="titel.webp" alt="Leehan">
+    </div>
+
+    <img class="sticker g1" id="g1" src="1.webp" alt="红框眼镜豚鼠">
+    <img class="sticker g2" id="g2" src="2.webp" alt="炸毛豚鼠">
+    <img class="sticker g3" id="g3" src="3.webp" alt="头巾爱心豚鼠">
+
+    <img class="sticker note" id="noteImg" src="xtitel.webp" alt="D.M便签">
+    <img class="sticker music-card" id="musicBox" src="player.webp" alt="小熊白兔播放器">
+    <img class="sticker snow-bear" id="snowBear" src="only.webp" alt="雪地小熊">
   </div>
-
-  <img class="sticker g1" id="g1" src="1.webp" alt="红框眼镜豚鼠">
-  <img class="sticker g2" id="g2" src="2.webp" alt="炸毛豚鼠">
-  <img class="sticker g3" id="g3" src="3.webp" alt="头巾爱心豚鼠">
-
-  <img class="sticker note" id="noteImg" src="xtitel.webp" alt="D.M便签">
-  <img class="sticker music-card" id="musicBox" src="player.webp" alt="小熊白兔播放器">
-  <img class="sticker snow-bear" id="snowBear" src="only.webp" alt="雪地小熊">
 </div>
 
 <script>
+// 自动缩放画布，和leehan2保持一致
+function resizeCanvas(){
+  const page = document.querySelector('.page');
+  const canvas = document.getElementById('canvas');
+  const scaleX = page.clientWidth / 960;
+  const scaleY = page.clientHeight / 1707;
+  canvas.style.transform = `scale(${scaleX}, ${scaleY})`;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
 function triggerJelly(el, soft = false) {
   el.classList.remove('jelly', 'jelly-soft');
   void el.offsetWidth;

@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>行程页</title>
-<!-- 思源宋体CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noto-serif-sc@1.0.1/css/noto-serif-sc.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -155,7 +154,7 @@ html,body{
   font-size:clamp(1.3rem,3.5vw,2.2rem);
   line-height:1;
  }
- .calendar-item .month-text{
+ .calendar-item .week-text{
   font-size:clamp(0.5rem,1vw,0.8rem);
   margin-top:4px;
  }
@@ -196,16 +195,16 @@ html,body{
   <div class="play-wrap btn-img" id="playBtn">
     <img src="play_off.webp" alt="播放暂停">
   </div>
-  <div class="home-wrap btn-img" onclick="location.href='leehan.html'">
+  <div class="home-wrap btn-img" id="homeBtn">
     <img src="home.gif" alt="返回主页">
   </div>
   <div class="text-area">
     <img id="locIcon" src="sol.webp" alt="sol">
   </div>
-  <div class="box-static box1"></div>
-  <div class="box-static box2"></div>
-  <div class="box-static box3"></div>
-  <div class="box-static box4"></div>
+  <div class="box-static box1" id="box1"></div>
+  <div class="box-static box2" id="box2"></div>
+  <div class="box-static box3" id="box3"></div>
+  <div class="box-static box4" id="box4"></div>
 
   <div class="schedule-text" id="scheduleBox"></div>
 
@@ -290,9 +289,12 @@ let isPlaying = false;
 let autoTimer = null;
 let currentIndex = 0;
 
+const weekArr = ["星期四","星期五","星期六","星期日","星期一","星期二","星期三"];
+
 const track = document.getElementById("calendarTrack");
 const playWrap = document.getElementById("playBtn");
 const playImg = playWrap.querySelector("img");
+const homeBtn = document.getElementById("homeBtn");
 const locIcon = document.getElementById("locIcon");
 const scheduleBox = document.getElementById("scheduleBox");
 const numBox = document.getElementById("numBox");
@@ -304,6 +306,13 @@ playWrap.onclick = function(){
     startAuto();
   }
 }
+homeBtn.onclick = function(){
+  location.href='leehan.html';
+}
+document.getElementById("box1").onclick = ()=>{};
+document.getElementById("box2").onclick = ()=>{};
+document.getElementById("box3").onclick = ()=>{};
+document.getElementById("box4").onclick = ()=>{};
 
 let isDrag = false;
 let startX = 0;
@@ -326,11 +335,14 @@ function renderCalendar(){
   for(let i=0; i<dayData.length; i++){
     const div = document.createElement("div");
     div.className = "calendar-item";
+    const weekText = weekArr[i % 7];
     div.innerHTML = `
       <div class="day-num">${i+1}</div>
-      <div class="month-text">october</div>
+      <div class="week-text">${weekText}</div>
     `;
-    div.onclick = () => selectDay(i);
+    div.onclick = () => {
+      selectDay(i);
+    };
     track.appendChild(div);
   }
   updateActive();
@@ -354,6 +366,12 @@ function updateView(idx){
   })
   numBox.innerHTML = html;
   updateActive();
+
+  const itemW = track.querySelector(".calendar-item").offsetWidth;
+  const gap = itemW * 0.025;
+  const per = itemW + gap;
+  currentTranslate = - idx * per;
+  track.style.transform = `translateX(${currentTranslate}px)`;
 }
 
 function selectDay(idx){
@@ -393,13 +411,13 @@ document.addEventListener("mousemove", (e)=>{
 document.addEventListener("mouseup", ()=>{
   if(!isDrag) return;
   isDrag = false;
+  track.style.transition = "transform 0.35s ease-out";
   const itemW = track.querySelector(".calendar-item").offsetWidth;
   const gap = itemW * 0.025;
   const per = itemW + gap;
   let idx = Math.round(-currentTranslate / per);
   idx = Math.max(0, Math.min(idx, dayData.length - 1));
   selectDay(idx);
-  track.style.transition = "transform 0.35s ease-out";
 })
 
 track.addEventListener("touchstart", (e)=>{
@@ -418,19 +436,108 @@ track.addEventListener("touchmove", (e)=>{
 track.addEventListener("touchend", ()=>{
   if(!isDrag) return;
   isDrag = false;
+  track.style.transition = "transform 0.35s ease-out";
   const itemW = track.querySelector(".calendar-item").offsetWidth;
   const gap = itemW * 0.025;
   const per = itemW + gap;
   let idx = Math.round(-currentTranslate / per);
   idx = Math.max(0, Math.min(idx, dayData.length - 1));
   selectDay(idx);
-  track.style.transition = "transform 0.35s ease-out";
 })
 
 renderCalendar();
 updateView(currentIndex);
 </script>
+<script>
+function triggerJelly(el, soft = false) {
+  el.classList.remove('jelly', 'jelly-soft');
+  void el.offsetWidth;
+  el.classList.add(soft ? 'jelly-soft' : 'jelly');
+}
+
+const soundList = {
+  g1: "onedoor.mp3",
+  g2: "lp.mp3",
+  g3: "woaini.mp3",
+  noteImg: "hlo.mp3",
+  snowBear: "na.mp3",
+  title: "xsy.mp3",
+  musicBox: "lon.mp3"
+};
+const loopAndSaveIds = ["snowBear", "musicBox"];
+
+const audioMap = {};
+const playingState = {};
+let saveTimer = null;
+
+function saveAudioState(id) {
+  if (!loopAndSaveIds.includes(id)) return;
+  const audio = audioMap[id];
+  if (!audio) return;
+  const data = {
+    id: id,
+    currentTime: audio.currentTime,
+    playing: playingState[id]
+  };
+  localStorage.setItem("audioState", JSON.stringify(data));
+}
+
+function restoreAudioState() {
+  const str = localStorage.getItem("audioState");
+  if (!str) return;
+  const data = JSON.parse(str);
+  if (!loopAndSaveIds.includes(data.id)) return;
+
+  if (!audioMap[data.id]) {
+    const audio = new Audio(soundList[data.id]);
+    audio.loop = true;
+    audioMap[data.id] = audio;
+    playingState[data.id] = false;
+  }
+  const audio = audioMap[data.id];
+  audio.currentTime = data.currentTime;
+  if (data.playing) {
+    audio.play().catch(e=>console.log(e));
+    playingState[data.id] = true;
+  }
+}
+
+function toggleSound(id) {
+  if (!audioMap[id]) {
+    const audio = new Audio(soundList[id]);
+    if (loopAndSaveIds.includes(id)) {
+      audio.loop = true;
+    } else {
+      audio.onended = () => {
+        playingState[id] = false;
+      }
+    }
+    audioMap[id] = audio;
+    playingState[id] = false;
+  }
+  const audio = audioMap[id];
+
+  if (playingState[id]) {
+    audio.pause();
+    playingState[id] = false;
+    if(loopAndSaveIds.includes(id)) localStorage.removeItem("audioState");
+  } else {
+    audio.play().catch(e=>console.log(e));
+    playingState[id] = true;
+  }
+  saveAudioState(id);
+}
+
+saveTimer = setInterval(()=>{
+  const str = localStorage.getItem("audioState");
+  if(str){
+    const d = JSON.parse(str);
+    if(audioMap[d.id]) saveAudioState(d.id);
+  }
+}, 300);
+
+window.onload = restoreAudioState;
+</script>
 </body>
 </html>
-
 
