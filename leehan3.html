@@ -12,7 +12,7 @@ html,body{
   font-family: "Noto Serif SC", system-ui, serif;
   font-weight:700;
 }
- @media (max-width:767px) {
+@media (max-width:767px) {
   html,body{
     width:100%;
     height:100%;
@@ -31,8 +31,8 @@ html,body{
     background-size:100% 100%;
     overflow:hidden;
   }
- }
- @media (min-width:768px) {
+}
+@media (min-width:768px) {
   html,body{
     overflow-y:auto;
   }
@@ -45,12 +45,12 @@ html,body{
     background-size:100% 100%;
     overflow:hidden;
   }
- }
- .btn-img{
+}
+.btn-img{
   position:absolute;
   cursor:pointer;
- }
- .play-wrap{
+}
+.play-wrap{
   top: -18%;
   left: 2%;
   width: 70.2%;
@@ -58,59 +58,60 @@ html,body{
   position: absolute;
   cursor: pointer;
   transition: transform 0.15s ease;
- }
- .play-wrap:active{
+}
+.play-wrap:active{
   transform: scale(0.92);
- }
- .play-wrap img{
+}
+.play-wrap img{
   width:100%;
   height:100%;
   object-fit:contain;
   display:block;
   pointer-events:none;
- }
- .play-wrap::after{
+}
+.play-wrap::after{
   content:'';
   position:absolute;
   inset:-10px;
- }
- .home-wrap{
+}
+.home-wrap{
   top:1.2%;
   right:5.8%;
   width:14%;
   height:14%;
   transition: transform 0.15s ease;
- }
- .home-wrap:active{
+}
+.home-wrap:active{
   transform: scale(0.92);
- }
- .home-wrap img{
+}
+.home-wrap img{
   width:100%;
   height:100%;
   object-fit:contain;
   display:block;
- }
- .text-area{
+}
+.text-area{
   position:absolute;
   top:10%;
   left:10.5%;
- }
- .text-area img{
+}
+.text-area img{
   height: 235px;
   object-fit: contain;
   display:block;
- }
- .box-static{
+  transition: transform 0.2s ease;
+}
+.box-static{
   position:absolute;
   width:20.2%;
   height:23.2%;
   cursor:pointer;
- }
- .box1{top:41%; left:2.2%;}
- .box2{top:41%; left:24.3%;}
- .box3{top:41%; left:46.4%;}
- .box4{top:68.5%; left:68.5%;}
- .calendar-container{
+}
+.box1{top:41%; left:2.2%;}
+.box2{top:41%; left:24.3%;}
+.box3{top:41%; left:46.4%;}
+.box4{top:68.5%; left:68.5%;}
+.calendar-container{
   position:absolute;
   left:0;
   bottom:1.5%;
@@ -118,16 +119,16 @@ html,body{
   height:22%;
   overflow:hidden;
   touch-action: pan-x;
- }
- .calendar-track{
+}
+.calendar-track{
   display:flex;
   gap:2.5%;
   height:100%;
   padding-left:3.1%;
   align-items:center;
   transition: transform 0.35s ease-out;
- }
- .calendar-item{
+}
+.calendar-item{
   width:18%;
   aspect-ratio: 3 / 4;
   flex-shrink:0;
@@ -142,24 +143,24 @@ html,body{
   background:rgba(255,255,255,0.3);
   user-select:none;
   transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
- }
- .calendar-item:active{
+}
+.calendar-item:active{
   transform: scale(0.92);
- }
- .calendar-item.active{
+}
+.calendar-item.active{
   border-color:#704c36;
   background:rgba(255,255,255,0.7);
   box-shadow:0 0 8px #704c3660;
- }
- .calendar-item .day-num{
+}
+.calendar-item .day-num{
   font-size:clamp(1.3rem,3.5vw,2.2rem);
   line-height:1;
- }
- .calendar-item .week-text{
+}
+.calendar-item .week-text{
   font-size:clamp(0.5rem,1vw,0.8rem);
   margin-top:4px;
- }
- .schedule-text{
+}
+.schedule-text{
   position:absolute;
   top:24%;
   left:16%;
@@ -171,8 +172,8 @@ html,body{
   display:flex;
   flex-direction:column;
   justify-content:center;
- }
- .num-single{
+}
+.num-single{
   position:absolute;
   top:55%;
   left:0;
@@ -182,13 +183,13 @@ html,body{
   font-family:monospace;
   font-weight:bold;
   font-size:clamp(1.2rem,3.6vw,1.5rem);
- }
- .num-single span{
+}
+.num-single span{
   display:inline-block;
   width:2.2em;
   text-align:center;
   margin:0 1.3em;
- }
+}
 </style>
 </head>
 <body>
@@ -200,7 +201,7 @@ html,body{
     <img src="home.gif" alt="返回主页">
   </div>
   <div class="text-area">
-    <img id="locIcon" src="sol.webp" alt="sol">
+    <img id="locIcon" src="sol.webp" alt="图标">
   </div>
   <div class="box-static box1" id="box1"></div>
   <div class="box-static box2" id="box2"></div>
@@ -218,37 +219,37 @@ html,body{
 
 <script>
 const numList = [
-"86 10 0 0",
-"64 3 0 0",
-"65 6 0 0",
-"31 7 0 0",
-"41 1 0 0",
-"48 1 0 0",
-"11 3 0 0",
-"46 4 0 0",
-"36 0 0 0",
-"20 4 0 0",
-"11 2 0 0",
-"24 1 0 0",
-"76 1 0 0",
-"11 2 0 0",
-"24 1 0 0",
-"91 3 1 0",
-"9 1 0 0",
-"50 1 0 0",
-"8 3 0 0",
-"35 0 0 0",
-"7 2 0 0",
-"2 0 0 0",
-"13 0 0 0",
-"7 0 0 0",
-"67 1 0 0",
-"14 1 0 0",
-"93 1 0 0",
-"31 1 0 0",
-"5 1 0 0",
-"7 0 0 0",
-"14 2 0 0"
+  "86 10 0 0",
+  "64 3 0 0",
+  "65 6 0 0",
+  "31 7 0 0",
+  "41 1 0 0",
+  "48 1 0 0",
+  "11 3 0 0",
+  "46 4 0 0",
+  "36 0 0 0",
+  "20 4 0 0",
+  "11 2 0 0",
+  "24 1 0 0",
+  "76 1 0 0",
+  "11 2 0 0",
+  "24 1 0 0",
+  "91 3 1 0",
+  "9 1 0 0",
+  "50 1 0 0",
+  "8 3 0 0",
+  "35 0 0 0",
+  "7 2 0 0",
+  "2 0 0 0",
+  "13 0 0 0",
+  "7 0 0 0",
+  "67 1 0 0",
+  "14 1 0 0",
+  "93 1 0 0",
+  "31 1 0 0",
+  "5 1 0 0",
+  "7 0 0 0",
+  "14 2 0 0"
 ];
 
 const dayData = [
@@ -264,9 +265,9 @@ const dayData = [
   {locImg:"qy.webp", scale:1.1, x:3, y:-10, text:"日本千叶 KNOCK ON Vol.2 d1"},
   {locImg:"qy.webp", scale:1.1, x:3, y:-10, text:"日本千叶 KNOCK ON Vol.2 d2"},
   {locImg:"sol.webp", scale:1, x:0, y:0, text:"HDN返韩<br>后续专录音Behind"},
-  {locImg:"sol.webp", scale:1, x:0, y:0, text:"KBS开放音乐会"},
-  {locImg:"sol.webp", scale:1, x:0, y:0, text:"BEHINDOOR"},
-  {locImg:"sol.webp", scale:1, x:0, y:0, text:"M COUNTDOWN 《Count To Love》舞台<br>SW签售"},
+  {locImg:"bj.webp", scale:1.25, x:7, y:-10, text:"KBS开放音乐会"},
+  {locImg:"la.webp", scale:1.4, x:9, y:2, text:"BEHINDOOR"},
+  {locImg:"da.webp", scale:1.14, x:2, y:0, text:"M COUNTDOWN 《Count To Love》舞台<br>SW签售"},
   {locImg:"sol.webp", scale:1, x:0, y:0, text:"KBS 音乐银行 《Count To Love》<br>DAM BALANCED<br>微博直播"},
   {locImg:"sol.webp", scale:1, x:0, y:0, text:"mini FM<br>wvs line"},
   {locImg:"sol.webp", scale:1, x:0, y:0, text:"BOYNEXTDOOR’s WEGO 2026 Autumn/Winter Visual Shoot — Behind the Scenes<br>yzy线上签售"},
@@ -275,14 +276,15 @@ const dayData = [
   {locImg:"sol.webp", scale:1, x:0, y:0, text:"BBNEXDO in Sweet Dreams - 特别留言"},
   {locImg:"sol.webp", scale:1, x:0, y:0, text:"无行程"},
   {locImg:"sol.webp", scale:1, x:0, y:0, text:"BND in USJ"},
-  {locImg:"sol.webp", scale:1, x:0, y:0, text:"ICN出发<br>yzy北京签售d1"},
-  {locImg:"sol.webp", scale:1, x:0, y:0, text:"yzy北京签售d2"},
-  {locImg:"sol.webp", scale:1, x:0, y:0, text:"ICN出发美巡"},
-  {locImg:"sol.webp", scale:1, x:0, y:0, text:"LAX到达<br>Music Lounge"},
-  {locImg:"sol.webp", scale:1, x:0, y:0, text:"ANTI_STAN 李涵篇"},
-  {locImg:"sol.webp", scale:1, x:0, y:0, text:"LAX出发<br>DFW到达<br>回归B-side"},
-  {locImg:"sol.webp", scale:1, x:0, y:0, text:"达拉斯世界水族馆<br>𝐁𝐢𝐁𝐢𝐀𝐧𝐠 𝐅𝐢𝐥𝐦 𝐁𝐞𝐡𝐢𝐧𝐝<br>二巡达拉斯 The Bomb Factory 演唱会"},
-  {locImg:"sol.webp", scale:1, x:0, y:0, text:"261030 BOYNEXTDOOR TOUR ‘KNOCK ON Vol.2’ IN DALLAS<br>KBS不朽的名曲相关<br>Rolling Stone滚石采访"} ];
+  {locImg:"bj.webp", scale:1.25, x:7, y:-10, text:"ICN出发<br>yzy北京签售d1"},
+  {locImg:"bj.webp", scale:1.25, x:7, y:-10, text:"yzy北京签售d2"},
+  {locImg:"la.webp", scale:1.4, x:9, y:2, text:"ICN出发美巡"},
+  {locImg:"la.webp", scale:1.4, x:9, y:2, text:"LAX到达<br>Music Lounge"},
+  {locImg:"la.webp", scale:1.4, x:9, y:2, text:"ANTI_STAN 李涵篇"},
+  {locImg:"da.webp", scale:1.14, x:2, y:0, text:"LAX出发<br>DFW到达<br>回归B-side"},
+  {locImg:"da.webp", scale:1.14, x:2, y:0, text:"达拉斯世界水族馆<br>𝐁𝐢𝐁𝐢𝐀𝐧𝐠 𝐅𝐢𝐥𝐦 𝐁𝐞𝐡𝐢𝐧𝐝<br>二巡达拉斯 The Bomb Factory 演唱会"},
+  {locImg:"da.webp", scale:1.14, x:2, y:0, text:"261030 BOYNEXTDOOR TOUR ‘KNOCK ON Vol.2’ IN DALLAS<br>KBS不朽的名曲相关<br>Rolling Stone滚石采访"}
+];
 
 const playOffSrc = "play_off.webp";
 const playOnSrc  = "play_on.webp";
@@ -470,6 +472,7 @@ calendarContainer.addEventListener("touchcancel", touchEndHandler);
 renderCalendar();
 updateView(currentIndex);
 </script>
+
 <script>
 function triggerJelly(el, soft = false) {
   el.classList.remove('jelly', 'jelly-soft');
@@ -486,80 +489,79 @@ const soundList = {
   title: "xsy.mp3",
   musicBox: "lon.mp3"
 };
-const loopAndSaveIds = ["snowBear", "musicBox"];
-
+const loopBgIds = ["snowBear", "musicBox"];
 const audioMap = {};
 const playingState = {};
-let saveTimer = null;
 
-function saveAudioState(id) {
-  if (!loopAndSaveIds.includes(id)) return;
+function getKey(id){
+  return "bg_audio_" + id;
+}
+
+function saveBgState(id){
+  if(!loopBgIds.includes(id)) return;
   const audio = audioMap[id];
-  if (!audio) return;
-  const data = {
-    id: id,
+  if(!audio) return;
+  localStorage.setItem(getKey(id), JSON.stringify({
     currentTime: audio.currentTime,
     playing: playingState[id]
-  };
-  localStorage.setItem("audioState", JSON.stringify(data));
+  }));
 }
 
-function restoreAudioState() {
-  const str = localStorage.getItem("audioState");
-  if (!str) return;
+function restoreBg(id){
+  const str = localStorage.getItem(getKey(id));
+  if(!str) return;
   const data = JSON.parse(str);
-  if (!loopAndSaveIds.includes(data.id)) return;
-
-  if (!audioMap[data.id]) {
-    const audio = new Audio(soundList[data.id]);
-    audio.loop = true;
-    audioMap[data.id] = audio;
-    playingState[data.id] = false;
-  }
-  const audio = audioMap[data.id];
-  audio.currentTime = data.currentTime;
-  if (data.playing) {
-    audio.play().catch(e=>console.log(e));
-    playingState[data.id] = true;
-  }
-}
-
-function toggleSound(id) {
-  if (!audioMap[id]) {
-    const audio = new Audio(soundList[id]);
-    if (loopAndSaveIds.includes(id)) {
-      audio.loop = true;
-    } else {
-      audio.onended = () => {
-        playingState[id] = false;
-      }
-    }
-    audioMap[id] = audio;
+  if(!audioMap[id]){
+    const a = new Audio(soundList[id]);
+    a.loop = true;
+    audioMap[id] = a;
     playingState[id] = false;
   }
   const audio = audioMap[id];
-
-  if (playingState[id]) {
-    audio.pause();
-    playingState[id] = false;
-    if(loopAndSaveIds.includes(id)) localStorage.removeItem("audioState");
-  } else {
-    audio.play().catch(e=>console.log(e));
-    playingState[id] = true;
-  }
-  saveAudioState(id);
+  audio.addEventListener('loadedmetadata', ()=>{
+    audio.currentTime = data.currentTime;
+    if(data.playing){
+      audio.play().catch(e=>{});
+      playingState[id] = true;
+    }
+  }, {once:true});
 }
 
-saveTimer = setInterval(()=>{
-  const str = localStorage.getItem("audioState");
-  if(str){
-    const d = JSON.parse(str);
-    if(audioMap[d.id]) saveAudioState(d.id);
+function toggleSound(id){
+  if(!loopBgIds.includes(id)){
+    const s = new Audio(soundList[id]);
+    s.play().catch(e=>{});
+    return;
   }
-}, 300);
+  if(!audioMap[id]){
+    const a = new Audio(soundList[id]);
+    a.loop = true;
+    audioMap[id] = a;
+    playingState[id] = false;
+  }
+  const audio = audioMap[id];
+  if(playingState[id]){
+    audio.pause();
+    playingState[id] = false;
+  }else{
+    audio.play().catch(e=>{});
+    playingState[id] = true;
+  }
+  saveBgState(id);
+}
 
-window.onload = restoreAudioState;
+setInterval(()=>{
+  loopBgIds.forEach(id=>saveBgState(id));
+},300);
+
+window.addEventListener('load', ()=>{
+  loopBgIds.forEach(id=>restoreBg(id));
+});
 </script>
 </body>
 </html>
+
+</body>
+</html>
+
 

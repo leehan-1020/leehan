@@ -64,7 +64,7 @@ html,body{
 @keyframes jellyPopSoft {
   0%   { transform: scale(1); }
   30%  { transform: scale(0.96); }
-  55%  { transform: scale(1.05); }
+  55%  { transform: scale(1); }
   80%  { transform: scale(0.99); }
   100% { transform: scale(1); }
 }
@@ -180,87 +180,86 @@ const soundList = {
   title: "xsy.mp3",
   musicBox: "lon.mp3"
 };
-// 只有这两个：循环 + 跨页面记忆进度
-const loopAndSaveIds = ["snowBear", "musicBox"];
-
+// 需要持久保存进度的循环BGM
+const loopBgIds = ["snowBear", "musicBox"];
 const audioMap = {};
 const playingState = {};
-let saveTimer = null;
 
-// 新增：便签图片切换状态
 let noteIsXx = false;
 const noteImgSrc1 = "xtitel.webp";
 const noteImgSrc2 = "xxtitel.webp";
 
-// 仅循环音频才保存
-function saveAudioState(id) {
-  if (!loopAndSaveIds.includes(id)) return;
+// 每个BGM独立storage key，互不覆盖
+function getKey(id){
+  return "bg_audio_" + id;
+}
+
+// 保存单条BGM状态
+function saveBgState(id){
+  if(!loopBgIds.includes(id)) return;
   const audio = audioMap[id];
-  if (!audio) return;
-  const data = {
-    id: id,
+  if(!audio) return;
+  localStorage.setItem(getKey(id), JSON.stringify({
     currentTime: audio.currentTime,
     playing: playingState[id]
-  };
-  localStorage.setItem("audioState", JSON.stringify(data));
+  }));
 }
 
-// 只恢复循环音频
-function restoreAudioState() {
-  const str = localStorage.getItem("audioState");
-  if (!str) return;
+// 恢复单条BGM
+function restoreBg(id){
+  const str = localStorage.getItem(getKey(id));
+  if(!str) return;
   const data = JSON.parse(str);
-  if (!loopAndSaveIds.includes(data.id)) return;
-
-  if (!audioMap[data.id]) {
-    const audio = new Audio(soundList[data.id]);
-    audio.loop = true;
-    audioMap[data.id] = audio;
-    playingState[data.id] = false;
-  }
-  const audio = audioMap[data.id];
-  audio.currentTime = data.currentTime;
-  if (data.playing) {
-    audio.play().catch(e=>console.log(e));
-    playingState[data.id] = true;
-  }
-}
-
-function toggleSound(id) {
-  if (!audioMap[id]) {
-    const audio = new Audio(soundList[id]);
-    if (loopAndSaveIds.includes(id)) {
-      audio.loop = true;
-    } else {
-      audio.onended = () => {
-        playingState[id] = false;
-      }
-    }
-    audioMap[id] = audio;
+  if(!audioMap[id]){
+    const a = new Audio(soundList[id]);
+    a.loop = true;
+    audioMap[id] = a;
     playingState[id] = false;
   }
   const audio = audioMap[id];
-
-  if (playingState[id]) {
-    audio.pause();
-    playingState[id] = false;
-    if(loopAndSaveIds.includes(id)) localStorage.removeItem("audioState");
-  } else {
-    audio.play().catch(e=>console.log(e));
-    playingState[id] = true;
-  }
-  saveAudioState(id);
+  audio.addEventListener('loadedmetadata', ()=>{
+    audio.currentTime = data.currentTime;
+    if(data.playing){
+      audio.play().catch(e=>{});
+      playingState[id] = true;
+    }
+  }, {once:true});
 }
 
-saveTimer = setInterval(()=>{
-  const str = localStorage.getItem("audioState");
-  if(str){
-    const d = JSON.parse(str);
-    if(audioMap[d.id]) saveAudioState(d.id);
+function toggleSound(id){
+  // 短音效：一次性播放，不影响BGM
+  if(!loopBgIds.includes(id)){
+    const s = new Audio(soundList[id]);
+    s.play().catch(e=>{});
+    return;
   }
-}, 300);
+  // BGM切换播放暂停
+  if(!audioMap[id]){
+    const a = new Audio(soundList[id]);
+    a.loop = true;
+    audioMap[id] = a;
+    playingState[id] = false;
+  }
+  const audio = audioMap[id];
+  if(playingState[id]){
+    audio.pause();
+    playingState[id] = false;
+  }else{
+    audio.play().catch(e=>{});
+    playingState[id] = true;
+  }
+  saveBgState(id);
+}
 
-window.onload = restoreAudioState;
+// 定时自动保存两个BGM进度
+setInterval(()=>{
+  loopBgIds.forEach(id=>saveBgState(id));
+},300);
+
+// 页面加载，恢复两个BGM
+window.onload = ()=>{
+  loopBgIds.forEach(id=>restoreBg(id));
+};
 
 const g1 = document.getElementById('g1');
 const g2 = document.getElementById('g2');
@@ -283,20 +282,18 @@ g3.onclick = ()=>{
   toggleSound("g3");
 }
 
-// 标题：播放xsy.mp3，播完跳转 leehan2.html
+// 标题：播放音效，跳转leehan2
 title.onclick = () => {
   triggerJelly(title, true);
-  const audio = new Audio(soundList.title);
-  audio.play().catch(e=>console.log(e));
-  audio.onended = function(){
+  const titleAudio = new Audio(soundList.title);
+  titleAudio.play().catch(e=>{});
+  titleAudio.onended = function(){
     location.href = "leehan2.html";
   }
 };
 
-// 便签：切换图片 + 果冻动画 + 播放音效
 noteImg.onclick = ()=>{
   triggerJelly(noteImg);
-  // 切换图片
   noteIsXx = !noteIsXx;
   noteImg.src = noteIsXx ? noteImgSrc2 : noteImgSrc1;
   toggleSound("noteImg");
@@ -306,7 +303,6 @@ snowBear.onclick = ()=>{
   triggerJelly(snowBear);
   toggleSound("snowBear");
 }
-
 musicBox.onclick = ()=>{
   triggerJelly(musicBox);
   toggleSound("musicBox");
