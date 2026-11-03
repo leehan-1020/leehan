@@ -117,6 +117,7 @@ html,body{
   width:100%;
   height:22%;
   overflow:hidden;
+  touch-action: pan-x;
  }
  .calendar-track{
   display:flex;
@@ -292,6 +293,7 @@ let currentIndex = 0;
 const weekArr = ["星期四","星期五","星期六","星期日","星期一","星期二","星期三"];
 
 const track = document.getElementById("calendarTrack");
+const calendarContainer = document.querySelector(".calendar-container");
 const playWrap = document.getElementById("playBtn");
 const playImg = playWrap.querySelector("img");
 const homeBtn = document.getElementById("homeBtn");
@@ -316,8 +318,10 @@ document.getElementById("box4").onclick = ()=>{};
 
 let isDrag = false;
 let startX = 0;
+let startY = 0;
 let startTranslate = 0;
 let currentTranslate = 0;
+let isHorizontal = null;
 
 function updateActive(){
   const items = track.querySelectorAll(".calendar-item");
@@ -395,6 +399,7 @@ function stopAuto(){
   clearInterval(autoTimer);
 }
 
+// 鼠标拖拽
 track.addEventListener("mousedown", (e)=>{
   stopAuto();
   isDrag = true;
@@ -420,20 +425,35 @@ document.addEventListener("mouseup", ()=>{
   selectDay(idx);
 })
 
-track.addEventListener("touchstart", (e)=>{
+// 移动端触摸修复
+calendarContainer.addEventListener("touchstart", (e)=>{
   stopAuto();
   isDrag = true;
-  startX = e.touches[0].clientX;
+  const touch = e.touches[0];
+  startX = touch.clientX;
+  startY = touch.clientY;
   startTranslate = currentTranslate;
+  isHorizontal = null;
   track.style.transition = "none";
 })
-track.addEventListener("touchmove", (e)=>{
+
+calendarContainer.addEventListener("touchmove", (e)=>{
   if(!isDrag) return;
-  const dx = e.touches[0].clientX - startX;
-  currentTranslate = startTranslate + dx;
-  track.style.transform = `translateX(${currentTranslate}px)`;
-})
-track.addEventListener("touchend", ()=>{
+  const touch = e.touches[0];
+  const dx = touch.clientX - startX;
+  const dy = touch.clientY - startY;
+
+  if(isHorizontal === null){
+    isHorizontal = Math.abs(dx) > Math.abs(dy);
+  }
+  if(isHorizontal){
+    e.preventDefault();
+    currentTranslate = startTranslate + dx;
+    track.style.transform = `translateX(${currentTranslate}px)`;
+  }
+},{passive:false})
+
+function touchEndHandler(){
   if(!isDrag) return;
   isDrag = false;
   track.style.transition = "transform 0.35s ease-out";
@@ -443,7 +463,9 @@ track.addEventListener("touchend", ()=>{
   let idx = Math.round(-currentTranslate / per);
   idx = Math.max(0, Math.min(idx, dayData.length - 1));
   selectDay(idx);
-})
+}
+calendarContainer.addEventListener("touchend", touchEndHandler);
+calendarContainer.addEventListener("touchcancel", touchEndHandler);
 
 renderCalendar();
 updateView(currentIndex);
