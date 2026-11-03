@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=960, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>leehan2</title>
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+body{
+  width: 960px;
+  margin: 0 auto;
+  background: url("xbg.webp") no-repeat top center;
+  background-size: 960px 1707px;
+  background-attachment: fixed;
+}
+.content-wrap{
+  position: relative;
+  width: 960px;
+  height: 2800px;
+}
+.oct-img,
+.plate,
+.mc-cup,
+.nov-text,
+.home-gif{
+  position: absolute;
+  object-fit:contain;
+}
+.oct-img{
+  width: 250px;
+  left: 196px;
+  top: 260px;
+  z-index: 3;
+}
+.cake-wrap{
+  position: absolute;
+  width:240px;
+  left: 334px;
+  transform: translateX(-50%);
+  top: 150px;
+  z-index: 2;
+}
+.cake{
+  width: 100%;
+  cursor: pointer;
+}
+.plate{
+  width:300px;
+  height:300px;
+  transform:rotate(0deg);
+  left: 180px;
+  top: 200px;
+  z-index: 1;
+}
+.mc-cup{
+  width: 290px;
+  left: 596px;
+  top: 504px;
+  z-index:3;
+  cursor:pointer;
+}
+.nov-text{
+  width: 240px;
+  left: 624px;
+  top: 600px;
+  z-index:3;
+}
+.home-gif{
+  width: 140px;
+  right: 56px;
+  top: 40px;
+  left: auto;
+  z-index:3;
+  cursor:pointer;
+}
+
+/* 向前凸起Q弹样式 */
+.click-item{
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+              filter 0.35s ease;
+  transform: translateZ(0);
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.18));
+}
+.click-item:active{
+  transform: translateZ(40px) scale(1.08);
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.35));
+}
+
+/* 叠化转场 */
+.fade-overlay{
+  position: fixed;
+  inset:0;
+  background:#ffffff;
+  z-index:9999;
+  opacity:0;
+  pointer-events:none;
+  transition: opacity 0.32s ease-in-out;
+}
+.fade-overlay.active{
+  opacity:1;
+  pointer-events:auto;
+}
+</style>
+</head>
+<body>
+<div class="fade-overlay" id="fadeOverlay"></div>
+
+<div class="content-wrap">
+  <img class="oct-img" src="oct.webp" alt="标题">
+
+  <div class="cake-wrap">
+    <!-- 蛋糕绑定leehan3.html正文页 -->
+    <img class="cake click-item" src="ck.webp" alt="蛋糕" data-link="leehan3.html">
+  </div>
+
+  <img class="plate" src="pz.webp" alt="播放器">
+
+  <img class="mc-cup click-item" src="mc.webp" alt="杯子" data-link="cup.html">
+  <img class="nov-text" src="nov.webp" alt="nov文字">
+
+  <img class="home-gif click-item" src="home.gif" alt="返回主页" data-link="leehan.html">
+</div>
+
+<script>
+const overlay = document.getElementById('fadeOverlay');
+const clickItems = document.querySelectorAll('.click-item');
+
+clickItems.forEach(item => {
+  item.addEventListener('click', function () {
+    const targetUrl = this.dataset.link;
+    overlay.classList.add('active');
+    setTimeout(() => {
+      location.href = targetUrl;
+    }, 320);
+  });
+});
+</script>
+<script>
+function triggerJelly(el, soft = false) {
+  el.classList.remove('jelly', 'jelly-soft');
+  void el.offsetWidth;
+  el.classList.add(soft ? 'jelly-soft' : 'jelly');
+}
+
+const soundList = {
+  g1: "onedoor.mp3",
+  g2: "lp.mp3",
+  g3: "woaini.mp3",
+  noteImg: "hlo.mp3",
+  snowBear: "na.mp3",
+  title: "xsy.mp3",
+  musicBox: "lon.mp3"
+};
+// 只有这两个：循环 + 跨页面记忆进度
+const loopAndSaveIds = ["snowBear", "musicBox"];
+
+const audioMap = {};
+const playingState = {};
+let saveTimer = null;
+
+// 仅循环音频才保存
+function saveAudioState(id) {
+  if (!loopAndSaveIds.includes(id)) return;
+  const audio = audioMap[id];
+  if (!audio) return;
+  const data = {
+    id: id,
+    currentTime: audio.currentTime,
+    playing: playingState[id]
+  };
+  localStorage.setItem("audioState", JSON.stringify(data));
+}
+
+// 只恢复循环音频
+function restoreAudioState() {
+  const str = localStorage.getItem("audioState");
+  if (!str) return;
+  const data = JSON.parse(str);
+  if (!loopAndSaveIds.includes(data.id)) return;
+
+  if (!audioMap[data.id]) {
+    const audio = new Audio(soundList[data.id]);
+    audio.loop = true;
+    audioMap[data.id] = audio;
+    playingState[data.id] = false;
+  }
+  const audio = audioMap[data.id];
+  audio.currentTime = data.currentTime;
+  if (data.playing) {
+    audio.play().catch(e=>console.log(e));
+    playingState[data.id] = true;
+  }
+}
+
+function toggleSound(id) {
+  if (!audioMap[id]) {
+    const audio = new Audio(soundList[id]);
+    if (loopAndSaveIds.includes(id)) {
+      audio.loop = true;
+    } else {
+      audio.onended = () => {
+        playingState[id] = false;
+      }
+    }
+    audioMap[id] = audio;
+    playingState[id] = false;
+  }
+  const audio = audioMap[id];
+
+  if (playingState[id]) {
+    audio.pause();
+    playingState[id] = false;
+    if(loopAndSaveIds.includes(id)) localStorage.removeItem("audioState");
+  } else {
+    audio.play().catch(e=>console.log(e));
+    playingState[id] = true;
+  }
+  saveAudioState(id);
+}
+
+saveTimer = setInterval(()=>{
+  const str = localStorage.getItem("audioState");
+  if(str){
+    const d = JSON.parse(str);
+    if(audioMap[d.id]) saveAudioState(d.id);
+  }
+}, 300);
+
+window.onload = restoreAudioState;
+</script>
+</body>
+</html>
+
+

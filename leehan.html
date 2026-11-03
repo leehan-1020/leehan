@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Leehan · sweet whispers</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{
+  background:#ffffff;
+}
+body{
+  display:flex;
+  justify-content:center;
+  padding:20px 0;
+}
+.canvas{
+  position:relative;
+  width:960px;
+  height:1707px;
+}
+.bg{
+  width:960px;
+  height:1707px;
+  display:block;
+}
+
+@keyframes jellyPop {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(0.92); }
+  45%  { transform: scale(1.06); }
+  65%  { transform: scale(0.98); }
+  80%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+@keyframes jellyPopSoft {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(0.96); }
+  55%  { transform: scale(1.05); }
+  80%  { transform: scale(0.99); }
+  100% { transform: scale(1); }
+}
+.jelly{
+  animation: jellyPop 0.45s cubic-bezier(0.42, 0, 0.28, 1.4) both;
+  transform-origin: center center;
+}
+.jelly-soft{
+  animation: jellyPopSoft 0.4s cubic-bezier(0.42, 0, 0.32, 1.3) both;
+  transform-origin: center center;
+}
+.sticker{
+  position:absolute;
+  cursor:pointer;
+  z-index:10;
+  will-change: transform;
+}
+.sticker:hover{
+  transform: scale(1.04);
+}
+
+.name-title-wrap{
+  top:250px;
+  left:175px;
+  width:640px;
+  position:absolute;
+  pointer-events:none;
+}
+#title{
+  width:100%;
+  height:auto;
+  pointer-events:auto;
+}
+
+.g1{
+  top:236px;
+  left:208px;
+  width:190px;
+  z-index:11;
+}
+.g2{
+  top:234px;
+  left:410px;
+  width:190px;
+  z-index:11;
+}
+.g3{
+  top:232px;
+  left:612px;
+  width:190px;
+  z-index:11;
+}
+.note{
+  top:716px;
+  left:610px;
+  width:288px;
+}
+.music-card{
+  top:845px;
+  left:60px;
+  width:460px;
+}
+.snow-bear{
+  top:1310px;
+  left:520px;
+  width:360px;
+}
+
+@media (max-width: 540px) {
+  .canvas{
+    transform-origin: top center;
+    transform: scale(calc(100vw / 960));
+  }
+  body{
+    padding:0;
+  }
+}
+</style>
+</head>
+<body>
+<div class="canvas">
+  <img class="bg" src="bg.webp" alt="bg">
+
+  <div class="name-title-wrap">
+    <img class="sticker" id="title" src="titel.webp" alt="Leehan">
+  </div>
+
+  <img class="sticker g1" id="g1" src="1.webp" alt="红框眼镜豚鼠">
+  <img class="sticker g2" id="g2" src="2.webp" alt="炸毛豚鼠">
+  <img class="sticker g3" id="g3" src="3.webp" alt="头巾爱心豚鼠">
+
+  <img class="sticker note" id="noteImg" src="xtitel.webp" alt="D.M便签">
+  <img class="sticker music-card" id="musicBox" src="player.webp" alt="小熊白兔播放器">
+  <img class="sticker snow-bear" id="snowBear" src="only.webp" alt="雪地小熊">
+</div>
+
+<script>
+function triggerJelly(el, soft = false) {
+  el.classList.remove('jelly', 'jelly-soft');
+  void el.offsetWidth;
+  el.classList.add(soft ? 'jelly-soft' : 'jelly');
+}
+
+const soundList = {
+  g1: "onedoor.mp3",
+  g2: "lp.mp3",
+  g3: "woaini.mp3",
+  noteImg: "hlo.mp3",
+  snowBear: "na.mp3",
+  title: "xsy.mp3",
+  musicBox: "lon.mp3"
+};
+// 只有这两个：循环 + 跨页面记忆进度
+const loopAndSaveIds = ["snowBear", "musicBox"];
+
+const audioMap = {};
+const playingState = {};
+let saveTimer = null;
+
+// 新增：便签图片切换状态
+let noteIsXx = false;
+const noteImgSrc1 = "xtitel.webp";
+const noteImgSrc2 = "xxtitel.webp";
+
+// 仅循环音频才保存
+function saveAudioState(id) {
+  if (!loopAndSaveIds.includes(id)) return;
+  const audio = audioMap[id];
+  if (!audio) return;
+  const data = {
+    id: id,
+    currentTime: audio.currentTime,
+    playing: playingState[id]
+  };
+  localStorage.setItem("audioState", JSON.stringify(data));
+}
+
+// 只恢复循环音频
+function restoreAudioState() {
+  const str = localStorage.getItem("audioState");
+  if (!str) return;
+  const data = JSON.parse(str);
+  if (!loopAndSaveIds.includes(data.id)) return;
+
+  if (!audioMap[data.id]) {
+    const audio = new Audio(soundList[data.id]);
+    audio.loop = true;
+    audioMap[data.id] = audio;
+    playingState[data.id] = false;
+  }
+  const audio = audioMap[data.id];
+  audio.currentTime = data.currentTime;
+  if (data.playing) {
+    audio.play().catch(e=>console.log(e));
+    playingState[data.id] = true;
+  }
+}
+
+function toggleSound(id) {
+  if (!audioMap[id]) {
+    const audio = new Audio(soundList[id]);
+    if (loopAndSaveIds.includes(id)) {
+      audio.loop = true;
+    } else {
+      audio.onended = () => {
+        playingState[id] = false;
+      }
+    }
+    audioMap[id] = audio;
+    playingState[id] = false;
+  }
+  const audio = audioMap[id];
+
+  if (playingState[id]) {
+    audio.pause();
+    playingState[id] = false;
+    if(loopAndSaveIds.includes(id)) localStorage.removeItem("audioState");
+  } else {
+    audio.play().catch(e=>console.log(e));
+    playingState[id] = true;
+  }
+  saveAudioState(id);
+}
+
+saveTimer = setInterval(()=>{
+  const str = localStorage.getItem("audioState");
+  if(str){
+    const d = JSON.parse(str);
+    if(audioMap[d.id]) saveAudioState(d.id);
+  }
+}, 300);
+
+window.onload = restoreAudioState;
+
+const g1 = document.getElementById('g1');
+const g2 = document.getElementById('g2');
+const g3 = document.getElementById('g3');
+const noteImg = document.getElementById("noteImg");
+const snowBear = document.getElementById("snowBear");
+const title = document.getElementById('title');
+const musicBox = document.getElementById("musicBox");
+
+g1.onclick = ()=>{
+  triggerJelly(g1);
+  toggleSound("g1");
+}
+g2.onclick = ()=>{
+  triggerJelly(g2);
+  toggleSound("g2");
+}
+g3.onclick = ()=>{
+  triggerJelly(g3);
+  toggleSound("g3");
+}
+
+// 标题：播放xsy.mp3，播完跳转 leehan2.html
+title.onclick = () => {
+  triggerJelly(title, true);
+  const audio = new Audio(soundList.title);
+  audio.play().catch(e=>console.log(e));
+  audio.onended = function(){
+    location.href = "leehan2.html";
+  }
+};
+
+// 便签：切换图片 + 果冻动画 + 播放音效
+noteImg.onclick = ()=>{
+  triggerJelly(noteImg);
+  // 切换图片
+  noteIsXx = !noteIsXx;
+  noteImg.src = noteIsXx ? noteImgSrc2 : noteImgSrc1;
+  toggleSound("noteImg");
+}
+
+snowBear.onclick = ()=>{
+  triggerJelly(snowBear);
+  toggleSound("snowBear");
+}
+
+musicBox.onclick = ()=>{
+  triggerJelly(musicBox);
+  toggleSound("musicBox");
+}
+</script>
+</body>
+</html>
+

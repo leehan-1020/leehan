@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>行程页</title>
+<!-- 思源宋体CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noto-serif-sc@1.0.1/css/noto-serif-sc.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{
+  background:#f5f1ea;
+  font-family: "Noto Serif SC", system-ui, serif;
+  font-weight:700;
+}
+ @media (max-width:767px) {
+  html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+  }
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .page{
+    position:relative;
+    width:100%;
+    aspect-ratio: 960 / 1707;
+    background:url("xxbg.webp") no-repeat center;
+    background-size:100% 100%;
+    overflow:hidden;
+  }
+ }
+ @media (min-width:768px) {
+  html,body{
+    overflow-y:auto;
+  }
+  .page{
+    position:relative;
+    width:480px;
+    margin:30px auto;
+    height: calc(480px * 1707 / 960);
+    background:url("xxbg.webp") no-repeat center;
+    background-size:100% 100%;
+    overflow:hidden;
+  }
+ }
+ .btn-img{
+  position:absolute;
+  cursor:pointer;
+ }
+ .play-wrap{
+  top: -18%;
+  left: 2%;
+  width: 70.2%;
+  height: 56.8%;
+  position: absolute;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+ }
+ .play-wrap:active{
+  transform: scale(0.92);
+ }
+ .play-wrap img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  pointer-events:none;
+ }
+ .play-wrap::after{
+  content:'';
+  position:absolute;
+  inset:-10px;
+ }
+ .home-wrap{
+  top:1.2%;
+  right:5.8%;
+  width:14%;
+  height:14%;
+  transition: transform 0.15s ease;
+ }
+ .home-wrap:active{
+  transform: scale(0.92);
+ }
+ .home-wrap img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+ }
+ .text-area{
+  position:absolute;
+  top:10%;
+  left:10.5%;
+ }
+ .text-area img{
+  height: 235px;
+  object-fit: contain;
+  display:block;
+ }
+ .box-static{
+  position:absolute;
+  width:20.2%;
+  height:23.2%;
+  cursor:pointer;
+ }
+ .box1{top:41%; left:2.2%;}
+ .box2{top:41%; left:24.3%;}
+ .box3{top:41%; left:46.4%;}
+ .box4{top:68.5%; left:68.5%;}
+ .calendar-container{
+  position:absolute;
+  left:0;
+  bottom:1.5%;
+  width:100%;
+  height:22%;
+  overflow:hidden;
+ }
+ .calendar-track{
+  display:flex;
+  gap:2.5%;
+  height:100%;
+  padding-left:3.1%;
+  align-items:center;
+  transition: transform 0.35s ease-out;
+ }
+ .calendar-item{
+  width:18%;
+  aspect-ratio: 3 / 4;
+  flex-shrink:0;
+  border:2px solid #b8977c;
+  border-radius:8px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#704c36;
+  cursor:pointer;
+  background:rgba(255,255,255,0.3);
+  user-select:none;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+ }
+ .calendar-item:active{
+  transform: scale(0.92);
+ }
+ .calendar-item.active{
+  border-color:#704c36;
+  background:rgba(255,255,255,0.7);
+  box-shadow:0 0 8px #704c3660;
+ }
+ .calendar-item .day-num{
+  font-size:clamp(1.3rem,3.5vw,2.2rem);
+  line-height:1;
+ }
+ .calendar-item .month-text{
+  font-size:clamp(0.5rem,1vw,0.8rem);
+  margin-top:4px;
+ }
+ .schedule-text{
+  position:absolute;
+  top:24%;
+  left:16%;
+  right:8%;
+  height:18%;
+  color:#704c36;
+  font-size:clamp(1rem,3.2vw,1.3rem);
+  line-height:1.6;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+ }
+ .num-single{
+  position:absolute;
+  top:55%;
+  left:0;
+  width:100%;
+  text-align:center;
+  color:#704c36;
+  font-family:monospace;
+  font-weight:bold;
+  font-size:clamp(1.2rem,3.6vw,1.5rem);
+ }
+ .num-single span{
+  display:inline-block;
+  width:2.2em;
+  text-align:center;
+  margin:0 1.3em;
+ }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="play-wrap btn-img" id="playBtn">
+    <img src="play_off.webp" alt="播放暂停">
+  </div>
+  <div class="home-wrap btn-img" onclick="location.href='leehan.html'">
+    <img src="home.gif" alt="返回主页">
+  </div>
+  <div class="text-area">
+    <img id="locIcon" src="sol.webp" alt="sol">
+  </div>
+  <div class="box-static box1"></div>
+  <div class="box-static box2"></div>
+  <div class="box-static box3"></div>
+  <div class="box-static box4"></div>
+
+  <div class="schedule-text" id="scheduleBox"></div>
+
+  <div class="num-single" id="numBox"></div>
+
+  <div class="calendar-container">
+    <div class="calendar-track" id="calendarTrack"></div>
+  </div>
+</div>
+
+<script>
+const numList = [
+"86 10 0 0",
+"64 3 0 0",
+"65 6 0 0",
+"31 7 0 0",
+"41 1 0 0",
+"48 1 0 0",
+"11 3 0 0",
+"46 4 0 0",
+"36 0 0 0",
+"20 4 0 0",
+"11 2 0 0",
+"24 1 0 0",
+"76 1 0 0",
+"11 2 0 0",
+"24 1 0 0",
+"91 3 1 0",
+"9 1 0 0",
+"50 1 0 0",
+"8 3 0 0",
+"35 0 0 0",
+"7 2 0 0",
+"2 0 0 0",
+"13 0 0 0",
+"7 0 0 0",
+"67 1 0 0",
+"14 1 0 0",
+"93 1 0 0",
+"31 1 0 0",
+"5 1 0 0",
+"7 0 0 0",
+"14 2 0 0"
+];
+
+const dayData = [
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"M COUNTDOWN ANIMAL初舞台"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"261002 M2U签售"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"BOYNEXTDOOR 1st Studio Album Repackage 'ANIMAL' MV Behind Sketch<br>MA签售"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"SBS 人气歌谣（特别MC）"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"BOYNEXTDOOR [HOME: DELUXE] Concept Photo Behind Sketch"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"KBS 不朽的名曲 景福宫兴礼门广场公演"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"Anima MV Reaction"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"v+音乐中心<br>M COUNTDOWN ANIMAL舞台（一位获奖）<br>yzy线上签售"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"GMP 出发千叶KNOCK ON Vol.2"},
+  {locImg:"qy.webp", scale:1.1, x:3, y:-10, text:"日本千叶 KNOCK ON Vol.2 d1"},
+  {locImg:"qy.webp", scale:1.1, x:3, y:-10, text:"日本千叶 KNOCK ON Vol.2 d2"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"HDN返韩<br>后续专录音Behind"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"KBS开放音乐会"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"BEHINDOOR"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"M COUNTDOWN 《Count To Love》舞台<br>SW签售"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"KBS 音乐银行 《Count To Love》<br>DAM BALANCED<br>微博直播"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"mini FM<br>wvs line"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"BOYNEXTDOOR’s WEGO 2026 Autumn/Winter Visual Shoot — Behind the Scenes<br>yzy线上签售"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"Guinea Pig with me LEEHAN'S DAY<br>Home Party"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"wvs 生日直播"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"BBNEXDO in Sweet Dreams - 特别留言"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"无行程"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"BND in USJ"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"ICN出发<br>yzy北京签售d1"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"yzy北京签售d2"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"ICN出发美巡"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"LAX到达<br>Music Lounge"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"ANTI_STAN 李涵篇"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"LAX出发<br>DFW到达<br>回归B-side"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"达拉斯世界水族馆<br>𝐁𝐢𝐁𝐢𝐀𝐧𝐠 𝐅𝐢𝐥𝐦 𝐁𝐞𝐡𝐢𝐧𝐝<br>二巡达拉斯 The Bomb Factory 演唱会"},
+  {locImg:"sol.webp", scale:1, x:0, y:0, text:"261030 BOYNEXTDOOR TOUR ‘KNOCK ON Vol.2’ IN DALLAS<br>KBS不朽的名曲相关<br>Rolling Stone滚石采访"} ];
+
+const playOffSrc = "play_off.webp";
+const playOnSrc  = "play_on.webp";
+let isPlaying = false;
+let autoTimer = null;
+let currentIndex = 0;
+
+const track = document.getElementById("calendarTrack");
+const playWrap = document.getElementById("playBtn");
+const playImg = playWrap.querySelector("img");
+const locIcon = document.getElementById("locIcon");
+const scheduleBox = document.getElementById("scheduleBox");
+const numBox = document.getElementById("numBox");
+
+playWrap.onclick = function(){
+  if(isPlaying){
+    stopAuto();
+  }else{
+    startAuto();
+  }
+}
+
+let isDrag = false;
+let startX = 0;
+let startTranslate = 0;
+let currentTranslate = 0;
+
+function updateActive(){
+  const items = track.querySelectorAll(".calendar-item");
+  items.forEach((el,i)=>{
+    if(i === currentIndex){
+      el.classList.add("active");
+    }else{
+      el.classList.remove("active");
+    }
+  })
+}
+
+function renderCalendar(){
+  track.innerHTML = "";
+  for(let i=0; i<dayData.length; i++){
+    const div = document.createElement("div");
+    div.className = "calendar-item";
+    div.innerHTML = `
+      <div class="day-num">${i+1}</div>
+      <div class="month-text">october</div>
+    `;
+    div.onclick = () => selectDay(i);
+    track.appendChild(div);
+  }
+  updateActive();
+}
+
+function updateView(idx){
+  const info = dayData[idx];
+  if(info.locImg){
+    locIcon.src = info.locImg;
+    locIcon.style.display = "block";
+    locIcon.style.transform = `translate(${info.x}%, ${info.y}%) scale(${info.scale})`;
+    locIcon.style.transformOrigin = "center center";
+  }else{
+    locIcon.style.display = "none";
+  }
+  scheduleBox.innerHTML = info.text;
+  const parts = numList[idx].split(" ");
+  let html = "";
+  parts.forEach(p=>{
+    html += `<span>${p}</span>`
+  })
+  numBox.innerHTML = html;
+  updateActive();
+}
+
+function selectDay(idx){
+  currentIndex = idx;
+  updateView(currentIndex);
+}
+
+function startAuto(){
+  isPlaying = true;
+  playImg.src = playOnSrc;
+  clearInterval(autoTimer);
+  autoTimer = setInterval(()=>{
+    currentIndex ++;
+    if(currentIndex >= dayData.length) currentIndex = 0;
+    updateView(currentIndex);
+  }, 1200);
+}
+function stopAuto(){
+  isPlaying = false;
+  playImg.src = playOffSrc;
+  clearInterval(autoTimer);
+}
+
+track.addEventListener("mousedown", (e)=>{
+  stopAuto();
+  isDrag = true;
+  startX = e.clientX;
+  startTranslate = currentTranslate;
+  track.style.transition = "none";
+})
+document.addEventListener("mousemove", (e)=>{
+  if(!isDrag) return;
+  const dx = e.clientX - startX;
+  currentTranslate = startTranslate + dx;
+  track.style.transform = `translateX(${currentTranslate}px)`;
+})
+document.addEventListener("mouseup", ()=>{
+  if(!isDrag) return;
+  isDrag = false;
+  const itemW = track.querySelector(".calendar-item").offsetWidth;
+  const gap = itemW * 0.025;
+  const per = itemW + gap;
+  let idx = Math.round(-currentTranslate / per);
+  idx = Math.max(0, Math.min(idx, dayData.length - 1));
+  selectDay(idx);
+  track.style.transition = "transform 0.35s ease-out";
+})
+
+track.addEventListener("touchstart", (e)=>{
+  stopAuto();
+  isDrag = true;
+  startX = e.touches[0].clientX;
+  startTranslate = currentTranslate;
+  track.style.transition = "none";
+})
+track.addEventListener("touchmove", (e)=>{
+  if(!isDrag) return;
+  const dx = e.touches[0].clientX - startX;
+  currentTranslate = startTranslate + dx;
+  track.style.transform = `translateX(${currentTranslate}px)`;
+})
+track.addEventListener("touchend", ()=>{
+  if(!isDrag) return;
+  isDrag = false;
+  const itemW = track.querySelector(".calendar-item").offsetWidth;
+  const gap = itemW * 0.025;
+  const per = itemW + gap;
+  let idx = Math.round(-currentTranslate / per);
+  idx = Math.max(0, Math.min(idx, dayData.length - 1));
+  selectDay(idx);
+  track.style.transition = "transform 0.35s ease-out";
+})
+
+renderCalendar();
+updateView(currentIndex);
+</script>
+</body>
+</html>
+
+
