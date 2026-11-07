@@ -173,7 +173,6 @@ html,body{
      </div>
   </div>
 </div>
-
 <script>
 const stage = document.querySelector('.stage');
 const wrap = document.querySelector('.wrap');
@@ -194,43 +193,28 @@ fit();
 window.addEventListener('resize', fit);
 window.addEventListener('orientationchange', ()=>setTimeout(fit,100));
 
-// 核心：和你成功页面一致的结构
-const soundMap = {
-  titleImg: 'hlo.mp3',
-  bqWrap: '400.mp3',
-  fzWrap: 'od.mp3',
-  moWrap: 'lp.mp3',
-  lingWrap: 'love.mp3',
-  tzWrap: 'gb.mp3',
-  wbWrap: 'hd.mp3',
-  hhWrap: 'taw.mp3',
-  bqtWrap: 'sea.mp3'
-};
-
 let currentAudio = null;
 let currentSrc = null;
+// 只在这里标记需要循环的音频
+const loopList = ['400.mp3'];
 
 function bindAudio(el, src){
-  if(!el) return;
   el.onclick = function(){
-    // 点同一个，暂停
+    // 点击同一个，关闭
     if(currentSrc === src){
-      if(currentAudio){
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-      }
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
       currentAudio = null;
       currentSrc = null;
       return;
     }
-    // 先停上一个
+    // 先停掉正在播放的
     if(currentAudio){
       currentAudio.pause();
       currentAudio.currentTime = 0;
       currentAudio = null;
       currentSrc = null;
     }
-    // 新建Audio实例（就是你那份稳定代码的写法！）
     const audio = new Audio(src);
     audio.currentTime = 0;
     audio.play().catch(e=>console.log(src, e));
@@ -238,7 +222,11 @@ function bindAudio(el, src){
     currentSrc = src;
 
     audio.onended = function(){
-      if(currentAudio === audio){
+      if(currentAudio !== audio) return;
+      if(loopList.includes(src)){
+        audio.currentTime = 0;
+        audio.play().catch(e=>console.log(e));
+      }else{
         currentAudio = null;
         currentSrc = null;
       }
@@ -246,15 +234,16 @@ function bindAudio(el, src){
   }
 }
 
-bindAudio(document.querySelector('.title-img'), soundMap.titleImg);
-bindAudio(document.querySelector('.bq-wrap'), soundMap.bqWrap);
-bindAudio(document.querySelector('.fz-wrap'), soundMap.fzWrap);
-bindAudio(document.querySelector('.mo-wrap'), soundMap.moWrap);
-bindAudio(document.querySelector('.ling-wrap'), soundMap.lingWrap);
-bindAudio(document.querySelector('.tz-wrap'), soundMap.tzWrap);
-bindAudio(document.querySelector('.wb-wrap'), soundMap.wbWrap);
-bindAudio(document.querySelector('.hh-wrap'), soundMap.hhWrap);
-bindAudio(document.querySelector('.bqt-wrap'), soundMap.bqtWrap);
+// 全部直接绑定原生元素，没有任何浮层
+bindAudio(document.querySelector('.title-img'), 'hlo.mp3');
+bindAudio(document.querySelector('.bq-wrap'), '400.mp3');
+bindAudio(document.querySelector('.fz-wrap'), 'od.mp3');
+bindAudio(document.querySelector('.mo-wrap'), 'lp.mp3');
+bindAudio(document.querySelector('.ling-wrap'), 'love.mp3');
+bindAudio(document.querySelector('.tz-wrap'), 'gb.mp3');
+bindAudio(document.querySelector('.wb-wrap'), 'hd.mp3');
+bindAudio(document.querySelector('.hh-wrap'), 'taw.mp3');
+bindAudio(document.querySelector('.bqt-wrap'), 'sea.mp3');
 </script>
 </body>
 </html>
