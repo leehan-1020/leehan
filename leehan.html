@@ -20,7 +20,6 @@ html,body{
   font-family: "Yozai", system-ui, sans-serif;
   font-weight:500;
 }
-/* 外层只负责居中，不决定比例 */
 .stage{
   position:relative;
   width:100vw;
@@ -28,7 +27,6 @@ html,body{
   max-width:960px;
   max-height:1707px;
 }
-/* 真正锁比例的容器 */
 .wrap{
   position:absolute;
   top:0;
@@ -40,7 +38,6 @@ html,body{
   background:#fffff0;
   transform-origin:top left;
 }
-/* 内部缩放层：把 960x1707 等比塞进当前可用区域 */
 .inner{
   position:absolute;
   top:0;
@@ -49,10 +46,8 @@ html,body{
   height:1707px;
   transform-origin:top left;
 }
-/* 底图 */
 .bg-img{position:absolute;inset:0;z-index:0}
 .bg-img img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
-/* 标题：y=-2px */
 .title-img{
   position:absolute;
   width:calc(67% - 100px);
@@ -68,9 +63,7 @@ html,body{
   transform: translate(-50%, -2px) scale(0.96);
 }
 .title-img img{width:100%;object-fit:contain;display:block}
-/* 顶部小字：top25px、font-size24px不变 */
 .top-title-small{position:absolute;top:25px;left:20px;color:#555;font-size:24px;letter-spacing:1px;z-index:5}
-/* 右上角 1020 */
 .top-right-num{
   position:absolute;
   top:24px;
@@ -82,7 +75,6 @@ html,body{
   padding:4px 10px;
   border-radius:12px;
 }
-/* 桐儇记录 top366 不变 */
 .sub-tip{
   position:absolute;
   top:366px;
@@ -94,7 +86,6 @@ html,body{
   white-space:nowrap;
   z-index:5;
 }
-/* 0000.png 保持 top480、宽度157.5px不变 */
 .zero-wrap{
   position:absolute;
   top:480px;
@@ -104,7 +95,6 @@ html,body{
   z-index:4;
 }
 .zero-wrap img{width:100%;object-fit:contain;display:block}
-/* go-btn：top440，right30，尺寸76×76不变 */
 .go-btn{
   position:absolute;
   right:30px;
@@ -121,7 +111,6 @@ html,body{
   transform: translateY(-50%) scale(0.96);
 }
 .go-btn img{width:100%;height:100%;object-fit:contain;display:block}
-/* 贴纸容器 可点击贴纸统一回弹效果 */
 .sticky-wrap{position:absolute;inset:0;z-index:2;overflow:hidden}
 .sticker-item{
   position:absolute;
@@ -139,24 +128,16 @@ html,body{
   display:block;
   pointer-events: none;
 }
-/* hh：width:362.5px，top:611px，left:35px */
 .hh-wrap{width:362.5px;height:auto;top:611px;left:35px}
-/* wb：width:434px，top:713px，right:79px */
 .wb-wrap{width:434px;height:auto;top:713px;right:79px}
-/* bqt：342px，top:996px，right:538px */
 .bqt-wrap{width:342px;height:auto;top:996px;right:538px}
-/* bq：430px，top:925px，right:51px */
 .bq-wrap{width:430px;height:auto;top:925px;right:51px}
-/* tz：235px，top:1250px */
 .tz-wrap{width:235px;height:auto;top:1250px;left:50%;transform:translateX(-50%)}
 .tz-wrap:active{
   transform: translateX(-50%) scale(0.96) !important;
 }
-/* fz：bottom:73px，scale0.84 */
 .fz-wrap{width:319px;height:auto;left:39px;bottom:73px;transform:scale(0.84);transform-origin:left bottom}
-/* mo：left:373，bottom:100，scale0.9 */
 .mo-wrap{width:216px;height:auto;left:373px;bottom:100px;transform:scale(0.9);transform-origin:left bottom}
-/* ling：scale:0.978，right:19，bottom:66 */
 .ling-wrap{width:317px;height:auto;right:19px;bottom:66px;transform:scale(0.978);transform-origin:right bottom}
 </style>
 </head>
@@ -173,11 +154,9 @@ html,body{
        <div class="top-title-small">A Return Letter from the Little Fish</div>
       <div class="top-right-num">1020</div>
       <div class="sub-tip">*此为桐儇dm记录</div>
-       <!-- 新增 0000.png 位置不动 -->
       <div class="zero-wrap">
         <img src="0000.png" alt="0000">
       </div>
-       <!-- 跳转链接修改为 leehan2.html -->
       <a class="go-btn" href="leehan2.html">
         <img src="go.png" alt="go" />
       </a>
@@ -194,7 +173,7 @@ html,body{
      </div>
   </div>
 </div>
- <script>
+<script>
 const stage = document.querySelector('.stage');
 const wrap = document.querySelector('.wrap');
 const inner = document.querySelector('.inner');
@@ -203,12 +182,10 @@ function fit(){
   const sw = stage.clientWidth;
   const sh = stage.clientHeight;
   const scale = Math.min(sw / 960, sh / 1707);
-
   wrap.style.width = (960 * scale) + 'px';
   wrap.style.height = (1707 * scale) + 'px';
   wrap.style.left = ((sw - 960 * scale) / 2) + 'px';
   wrap.style.top = ((sh - 1707 * scale) / 2) + 'px';
-
   inner.style.transform = `scale(${scale})`;
 }
 
@@ -218,10 +195,12 @@ window.addEventListener('orientationchange', ()=>setTimeout(fit,100));
 
 let currentAudio = null;
 let currentSrc = null;
-const loopList = ['400.MP3'];
+// 只在这里标记需要循环的音频
+const loopList = ['400.mp3'];
 
 function bindAudio(el, src){
   el.onclick = function(){
+    // 点击同一个，关闭
     if(currentSrc === src){
       currentAudio.pause();
       currentAudio.currentTime = 0;
@@ -229,6 +208,7 @@ function bindAudio(el, src){
       currentSrc = null;
       return;
     }
+    // 先停掉正在播放的
     if(currentAudio){
       currentAudio.pause();
       currentAudio.currentTime = 0;
@@ -237,7 +217,7 @@ function bindAudio(el, src){
     }
     const audio = new Audio(src);
     audio.currentTime = 0;
-    audio.play().catch(err=>console.log(src, err));
+    audio.play().catch(e=>console.log(src, e));
     currentAudio = audio;
     currentSrc = src;
 
@@ -254,8 +234,9 @@ function bindAudio(el, src){
   }
 }
 
-bindAudio(document.querySelector('.title-img'), 'hlo.MP3');
-bindAudio(document.querySelector('.bq-wrap'), '400.MP3');
+// 全部直接绑定原生元素，没有任何浮层
+bindAudio(document.querySelector('.title-img'), 'hlo.mp3');
+bindAudio(document.querySelector('.bq-wrap'), '400.mp3');
 bindAudio(document.querySelector('.fz-wrap'), 'od.mp3');
 bindAudio(document.querySelector('.mo-wrap'), 'lp.mp3');
 bindAudio(document.querySelector('.ling-wrap'), 'love.mp3');
@@ -264,6 +245,5 @@ bindAudio(document.querySelector('.wb-wrap'), 'hd.mp3');
 bindAudio(document.querySelector('.hh-wrap'), 'taw.mp3');
 bindAudio(document.querySelector('.bqt-wrap'), 'sea.mp3');
 </script>
-
 </body>
 </html>
