@@ -139,13 +139,6 @@ html,body{
 .fz-wrap{width:319px;height:auto;left:39px;bottom:73px;transform:scale(0.84);transform-origin:left bottom}
 .mo-wrap{width:216px;height:auto;left:373px;bottom:100px;transform:scale(0.9);transform-origin:left bottom}
 .ling-wrap{width:317px;height:auto;right:19px;bottom:66px;transform:scale(0.978);transform-origin:right bottom}
-audio{
-  position:absolute;
-  width:0;
-  height:0;
-  opacity:0;
-  pointer-events:none;
-}
 </style>
 </head>
 <body>
@@ -181,35 +174,6 @@ audio{
   </div>
 </div>
 
-<!-- 静态预加载音频，带source + type，专门解决Safari识别问题 -->
-<audio id="audio_hlo" preload="auto" crossorigin="anonymous">
-  <source src="hlo.mp3" type="audio/mpeg">
-
-<audio id="audio_400" preload="auto" crossorigin="anonymous">
-  <source src="400.mp3" type="audio/mpeg">
-
-<audio id="audio_od" preload="auto" crossorigin="anonymous">
-  <source src="od.mp3" type="audio/mpeg">
-
-<audio id="audio_lp" preload="auto" crossorigin="anonymous">
-  <source src="lp.mp3" type="audio/mpeg">
-
-<audio id="audio_love" preload="auto" crossorigin="anonymous">
-  <source src="love.mp3" type="audio/mpeg">
-
-<audio id="audio_gb" preload="auto" crossorigin="anonymous">
-  <source src="gb.mp3" type="audio/mpeg">
-
-<audio id="audio_hd" preload="auto" crossorigin="anonymous">
-  <source src="hd.mp3" type="audio/mpeg">
-
-<audio id="audio_taw" preload="auto" crossorigin="anonymous">
-  <source src="taw.mp3" type="audio/mpeg">
-
-<audio id="audio_sea" preload="auto" crossorigin="anonymous">
-  <source src="sea.mp3" type="audio/mpeg">
-
-
 <script>
 const stage = document.querySelector('.stage');
 const wrap = document.querySelector('.wrap');
@@ -230,55 +194,67 @@ fit();
 window.addEventListener('resize', fit);
 window.addEventListener('orientationchange', ()=>setTimeout(fit,100));
 
+// 核心：和你成功页面一致的结构
+const soundMap = {
+  titleImg: 'hlo.mp3',
+  bqWrap: '400.mp3',
+  fzWrap: 'od.mp3',
+  moWrap: 'lp.mp3',
+  lingWrap: 'love.mp3',
+  tzWrap: 'gb.mp3',
+  wbWrap: 'hd.mp3',
+  hhWrap: 'taw.mp3',
+  bqtWrap: 'sea.mp3'
+};
+
 let currentAudio = null;
-// 循环清单
-const loopListId = ['audio_400'];
+let currentSrc = null;
 
-// 映射：点击元素 -> 对应audio id
-const audioMap = [
-  {el:'.title-img', audioId:'audio_hlo'},
-  {el:'.bq-wrap', audioId:'audio_400'},
-  {el:'.fz-wrap', audioId:'audio_od'},
-  {el:'.mo-wrap', audioId:'audio_lp'},
-  {el:'.ling-wrap', audioId:'audio_love'},
-  {el:'.tz-wrap', audioId:'audio_gb'},
-  {el:'.wb-wrap', audioId:'audio_hd'},
-  {el:'.hh-wrap', audioId:'audio_taw'},
-  {el:'.bqt-wrap', audioId:'audio_sea'},
-];
-
-audioMap.forEach(item=>{
-  const dom = document.querySelector(item.el);
-  const audioDom = document.getElementById(item.audioId);
-  dom.onclick = function(){
+function bindAudio(el, src){
+  if(!el) return;
+  el.onclick = function(){
     // 点同一个，暂停
-    if(currentAudio === audioDom){
-      audioDom.pause();
-      audioDom.currentTime = 0;
+    if(currentSrc === src){
+      if(currentAudio){
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
       currentAudio = null;
+      currentSrc = null;
       return;
     }
-    // 停上一个
+    // 先停上一个
     if(currentAudio){
       currentAudio.pause();
       currentAudio.currentTime = 0;
       currentAudio = null;
+      currentSrc = null;
     }
-    audioDom.currentTime = 0;
-    audioDom.play().catch(e=>console.log(item.audioId, e));
-    currentAudio = audioDom;
+    // 新建Audio实例（就是你那份稳定代码的写法！）
+    const audio = new Audio(src);
+    audio.currentTime = 0;
+    audio.play().catch(e=>console.log(src, e));
+    currentAudio = audio;
+    currentSrc = src;
 
-    audioDom.onended = function(){
-      if(currentAudio !== audioDom) return;
-      if(loopListId.includes(item.audioId)){
-        audioDom.currentTime = 0;
-        audioDom.play().catch(e=>console.log(e));
-      }else{
+    audio.onended = function(){
+      if(currentAudio === audio){
         currentAudio = null;
+        currentSrc = null;
       }
     }
   }
-})
+}
+
+bindAudio(document.querySelector('.title-img'), soundMap.titleImg);
+bindAudio(document.querySelector('.bq-wrap'), soundMap.bqWrap);
+bindAudio(document.querySelector('.fz-wrap'), soundMap.fzWrap);
+bindAudio(document.querySelector('.mo-wrap'), soundMap.moWrap);
+bindAudio(document.querySelector('.ling-wrap'), soundMap.lingWrap);
+bindAudio(document.querySelector('.tz-wrap'), soundMap.tzWrap);
+bindAudio(document.querySelector('.wb-wrap'), soundMap.wbWrap);
+bindAudio(document.querySelector('.hh-wrap'), soundMap.hhWrap);
+bindAudio(document.querySelector('.bqt-wrap'), soundMap.bqtWrap);
 </script>
 </body>
 </html>
