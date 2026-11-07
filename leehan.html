@@ -217,36 +217,51 @@ fit();
 window.addEventListener('resize', fit);
 window.addEventListener('orientationchange', ()=>setTimeout(fit,100));
 
-// 全局：当前播放音频
+// 全局：当前播放音频对象 + 音频src标记
 let currentAudio = null;
+let currentSrc = null;
 
-// 通用互斥绑定函数
+// 点击时再创建音频，苹果手机兼容
 function bindAudio(el, src, loop = false){
-  const audio = new Audio(src);
-  audio.loop = loop;
-  el.onclick = function(){
-    // 有正在播放的，先停掉
+  el.onclick = function(e){
+    e.preventDefault();
+    // 如果点的是正在播放的同一条：停止、清空
+    if(currentSrc === src){
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      currentAudio = null;
+      currentSrc = null;
+      return;
+    }
+    // 有别的音频在播放，先停
     if(currentAudio){
       currentAudio.pause();
       currentAudio.currentTime = 0;
-    }
-    // 点同一个：关闭
-    if(currentAudio === audio){
       currentAudio = null;
-      return;
+      currentSrc = null;
     }
+    // 点击瞬间新建音频（苹果Safari信任这个点击事件）
+    const audio = new Audio(src);
+    audio.loop = loop;
+    audio.preload = "auto";
     audio.currentTime = 0;
-    audio.play().catch(()=>{});
+    audio.play().catch(err=>{
+      console.log("播放失败：",err);
+    });
     currentAudio = audio;
+    currentSrc = src;
     audio.onended = ()=>{
-      if(currentAudio === audio) currentAudio = null;
+      if(currentAudio === audio){
+        currentAudio = null;
+        currentSrc = null;
+      }
     }
   }
 }
 
-// 标题
+// 标题 hlo.MP3
 bindAudio(document.querySelector('.title-img'), 'hlo.MP3', false);
-// bq 现在也纳入统一互斥
+// bq 400.MP3 循环
 bindAudio(document.querySelector('.bq-wrap'), '400.MP3', true);
 // 其余贴纸
 bindAudio(document.querySelector('.fz-wrap'), 'od.mp3', false);
