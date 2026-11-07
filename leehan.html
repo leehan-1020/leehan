@@ -218,12 +218,10 @@ window.addEventListener('orientationchange', ()=>setTimeout(fit,100));
 
 let currentAudio = null;
 let currentSrc = null;
-// 只在这里标记需要循环的音频，所有播放逻辑统一
 const loopList = ['400.MP3'];
 
 function bindAudio(el, src){
-  function playLogic(){
-    // 点同一个：关闭
+  el.onclick = function(){
     if(currentSrc === src){
       currentAudio.pause();
       currentAudio.currentTime = 0;
@@ -231,7 +229,6 @@ function bindAudio(el, src){
       currentSrc = null;
       return;
     }
-    // 先停正在播放的音频
     if(currentAudio){
       currentAudio.pause();
       currentAudio.currentTime = 0;
@@ -244,7 +241,6 @@ function bindAudio(el, src){
     currentAudio = audio;
     currentSrc = src;
 
-    // 统一ended回调，循环靠JS重播，不使用audio.loop
     audio.onended = function(){
       if(currentAudio !== audio) return;
       if(loopList.includes(src)){
@@ -256,19 +252,8 @@ function bindAudio(el, src){
       }
     }
   }
-  // 全部统一绑定 touchend + click
-  el.addEventListener('touchend', e=>{
-    e.preventDefault();
-    e.stopPropagation();
-    playLogic();
-  })
-  el.addEventListener('click', e=>{
-    e.stopPropagation();
-    playLogic();
-  })
 }
 
-// 所有音频调用写法完全一致
 bindAudio(document.querySelector('.title-img'), 'hlo.MP3');
 bindAudio(document.querySelector('.bq-wrap'), '400.MP3');
 bindAudio(document.querySelector('.fz-wrap'), 'od.mp3');
