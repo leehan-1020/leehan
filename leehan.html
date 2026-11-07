@@ -195,7 +195,6 @@ html,body{
   </div>
 </div>
  <script>
-/* 真正按比例缩放 */
 const stage = document.querySelector('.stage');
 const wrap = document.querySelector('.wrap');
 const inner = document.querySelector('.inner');
@@ -217,15 +216,14 @@ fit();
 window.addEventListener('resize', fit);
 window.addEventListener('orientationchange', ()=>setTimeout(fit,100));
 
-// 全局：当前播放音频对象 + 音频src标记
 let currentAudio = null;
 let currentSrc = null;
+// 只在这里标记需要循环的音频，所有播放逻辑统一
+const loopList = ['400.MP3'];
 
-// 点击时再创建音频，苹果手机兼容
-function bindAudio(el, src, loop = false){
-  el.onclick = function(e){
-    e.preventDefault();
-    // 如果点的是正在播放的同一条：停止、清空
+function bindAudio(el, src){
+  function playLogic(){
+    // 点同一个：关闭
     if(currentSrc === src){
       currentAudio.pause();
       currentAudio.currentTime = 0;
@@ -233,44 +231,53 @@ function bindAudio(el, src, loop = false){
       currentSrc = null;
       return;
     }
-    // 有别的音频在播放，先停
+    // 先停正在播放的音频
     if(currentAudio){
       currentAudio.pause();
       currentAudio.currentTime = 0;
       currentAudio = null;
       currentSrc = null;
     }
-    // 点击瞬间新建音频（苹果Safari信任这个点击事件）
     const audio = new Audio(src);
-    audio.loop = loop;
-    audio.preload = "auto";
     audio.currentTime = 0;
-    audio.play().catch(err=>{
-      console.log("播放失败：",err);
-    });
+    audio.play().catch(err=>console.log(src, err));
     currentAudio = audio;
     currentSrc = src;
-    audio.onended = ()=>{
-      if(currentAudio === audio){
+
+    // 统一ended回调，循环靠JS重播，不使用audio.loop
+    audio.onended = function(){
+      if(currentAudio !== audio) return;
+      if(loopList.includes(src)){
+        audio.currentTime = 0;
+        audio.play().catch(e=>console.log(e));
+      }else{
         currentAudio = null;
         currentSrc = null;
       }
     }
   }
+  // 全部统一绑定 touchend + click
+  el.addEventListener('touchend', e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    playLogic();
+  })
+  el.addEventListener('click', e=>{
+    e.stopPropagation();
+    playLogic();
+  })
 }
 
-// 标题 hlo.MP3
-bindAudio(document.querySelector('.title-img'), 'hlo.MP3', false);
-// bq 400.MP3 循环
-bindAudio(document.querySelector('.bq-wrap'), '400.MP3', true);
-// 其余贴纸
-bindAudio(document.querySelector('.fz-wrap'), 'od.mp3', false);
-bindAudio(document.querySelector('.mo-wrap'), 'lp.mp3', false);
-bindAudio(document.querySelector('.ling-wrap'), 'love.mp3', false);
-bindAudio(document.querySelector('.tz-wrap'), 'gb.mp3', false);
-bindAudio(document.querySelector('.wb-wrap'), 'hd.mp3', false);
-bindAudio(document.querySelector('.hh-wrap'), 'taw.mp3', false);
-bindAudio(document.querySelector('.bqt-wrap'), 'sea.mp3', false);
+// 所有音频调用写法完全一致
+bindAudio(document.querySelector('.title-img'), 'hlo.MP3');
+bindAudio(document.querySelector('.bq-wrap'), '400.MP3');
+bindAudio(document.querySelector('.fz-wrap'), 'od.mp3');
+bindAudio(document.querySelector('.mo-wrap'), 'lp.mp3');
+bindAudio(document.querySelector('.ling-wrap'), 'love.mp3');
+bindAudio(document.querySelector('.tz-wrap'), 'gb.mp3');
+bindAudio(document.querySelector('.wb-wrap'), 'hd.mp3');
+bindAudio(document.querySelector('.hh-wrap'), 'taw.mp3');
+bindAudio(document.querySelector('.bqt-wrap'), 'sea.mp3');
 </script>
 
 </body>
