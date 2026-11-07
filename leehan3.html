@@ -84,10 +84,11 @@ html,body{
   position:absolute;
   top:calc(20% - 15px);
   left:calc(15.83% - 15px - 2px + 1px);
-  width:calc(100% - 15.83% - 12% - 10px);
-  aspect-ratio:3 / 1;
-  min-height:0;
-  overflow:hidden;
+  width: max-content;
+  min-width: 120px;
+  aspect-ratio:unset;
+  height:auto;
+  overflow:visible;
   border:none;
   border-radius:10px;
   background:#fffee8;
@@ -101,12 +102,10 @@ html,body{
 .seoul-text{
   transform: scale(1/0.67);
   transform-origin: left top;
-  width:100%;
+  white-space: nowrap;
   color:#8b7976;
-  /* 原19px，缩小1px → 18px */
   font-size:18px;
   font-family: "MaoKenTangYuan", system-ui, serif;
-  white-space: nowrap;
 }
 .box-static{
   position:absolute;
@@ -249,13 +248,12 @@ html,body{
     <div class="play-tri" id="playIcon"></div>
     <div class="pause-line" id="pauseIcon">
       <span></span>
-      <span></span>
     </div>
     <span id="titleWord">小鱼的回信</span>
   </div>
 
   <div class="seoul-box">
-    <div class="seoul-text">小鱼去哪了📍首尔 Seoul</div>
+    <div class="seoul-text" id="cityText">小鱼去哪了📍首尔 Seoul</div>
   </div>
 
   <div class="home-wrap" id="homeBtn">
@@ -314,7 +312,7 @@ html,body{
     </div>
   </div>
 
-  <div class="calendar-container">
+  <div class="calendar-container" id="calendarContainer">
     <div class="calendar-track" id="calendarTrack"></div>
   </div>
 </div>
@@ -363,9 +361,9 @@ const dayData = [
   {text:"KBS 不朽的名曲 景福宫公演"},
   {text:"Anima MV Reaction"},
   {text:"v+音乐中心<br>M COUNTDOWN ANIMAL舞台（一位获奖）<br>yzy线上签售"},
-  {text:"GMP 出发千叶 KNOCK ON Vol.2"},
-  {text:"日本千叶 KNOCK ON Vol.2 d1"},
-  {text:"日本千叶 KNOCK ON Vol.2 d2"},
+  {text:"GMP 出发首尔 KNOCK ON Vol.2"},
+  {text:"首尔 KNOCK ON Vol.2 d1"},
+  {text:"首尔 KNOCK ON Vol.2 d2"},
   {text:"HDN返程<br>后续专录音Behind"},
   {text:"KBS开放音乐会"},
   {text:"BEHINDOOR"},
@@ -378,22 +376,38 @@ const dayData = [
   {text:"BBNEXDO in Sweet Dreams - 专属留言"},
   {text:"无行程"},
   {text:"BND in USJ"},
-  {text:"ICN出发<br>yzy北京签售d1"},
-  {text:"yzy北京签售d2"},
-  {text:"ICN出发美巡"},
-  {text:"LAX到达<br>Music Lounge"},
-  {text:"ANTI_STAN 李涵篇"},
-  {text:"LAX出发<br>DFW到达<br>回归B-side"},
-  {text:"达拉斯水族馆<br>BiBiAng Film Behind<br>二巡达拉斯 The Bomb Factory演唱会"},
-  {text:"261030 BOYNEXTDOOR TOUR ‘KNOCK ON’ IN DALLAS<br>KBS不朽的名曲<br>Rolling Stone采访"}
+  {text:"ICN出发<br>yzy北京 Beijing签售d1"},
+  {text:"yzy北京 Beijing签售d2"},
+  {text:"ICN出发<br>LAX到达洛杉矶 Los Angeles"},
+  {text:"LAX停留洛杉矶 Los Angeles"},
+  {text:"洛杉矶 Los Angeles 休整"},
+  {text:"达拉斯 Dallas 第一场"},
+  {text:"达拉斯 Dallas 第二场"},
+  {text:"达拉斯 Dallas 收尾"}
 ];
+
+// 根据日期获取城市文字
+function getCityText(dayNum){
+  if(dayNum === 11 || dayNum === 12){
+    return "小鱼去哪了📍千叶 Chiba";
+  }else if(dayNum === 24 || dayNum === 25){
+    return "小鱼去哪了📍北京 Beijing";
+  }else if(dayNum >=26 && dayNum <=28){
+    return "小鱼去哪了📍洛杉矶 Los Angeles";
+  }else if(dayNum >=29 && dayNum <=31){
+    return "小鱼去哪了📍达拉斯 Dallas";
+  }else{
+    return "小鱼去哪了📍首尔 Seoul";
+  }
+}
 
 let currentIndex = 0;
 const weekArr = ["星期四","星期五","星期六","星期日","星期一","星期二","星期三"];
 
 const track = document.getElementById("calendarTrack");
+const container = document.getElementById("calendarContainer");
 const scheduleBox = document.getElementById("scheduleBox");
-const container = document.querySelector(".calendar-container");
+const cityTextDom = document.getElementById("cityText");
 
 const titleWrap = document.getElementById("titleWrap");
 const playIcon = document.getElementById("playIcon");
@@ -476,9 +490,10 @@ function renderCalendar(){
   for(let i=0; i<dayData.length; i++){
     const div = document.createElement("div");
     div.className = "calendar-item";
+    const dayNum = i+1;
     const w = weekArr[i % 7];
     div.innerHTML = `
-      <div class="day-num">${i+1}</div>
+      <div class="day-num">${dayNum}</div>
       <div class="week-text">${w}</div>
     `;
     div.onclick = ()=>{
@@ -491,8 +506,11 @@ function renderCalendar(){
 }
 
 function updateView(idx){
+  const dayNum = idx + 1;
   const info = dayData[idx];
   scheduleBox.innerHTML = info.text;
+  cityTextDom.innerText = getCityText(dayNum);
+
   const parts = numList[idx].split(" ");
   document.getElementById("n1").innerText = parts[0];
   document.getElementById("n2").innerText = parts[1];
