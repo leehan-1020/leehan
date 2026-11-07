@@ -139,6 +139,13 @@ html,body{
 .fz-wrap{width:319px;height:auto;left:39px;bottom:73px;transform:scale(0.84);transform-origin:left bottom}
 .mo-wrap{width:216px;height:auto;left:373px;bottom:100px;transform:scale(0.9);transform-origin:left bottom}
 .ling-wrap{width:317px;height:auto;right:19px;bottom:66px;transform:scale(0.978);transform-origin:right bottom}
+audio{
+  position:absolute;
+  width:0;
+  height:0;
+  opacity:0;
+  pointer-events:none;
+}
 </style>
 </head>
 <body>
@@ -173,6 +180,36 @@ html,body{
      </div>
   </div>
 </div>
+
+<!-- 静态预加载音频，带source + type，专门解决Safari识别问题 -->
+<audio id="audio_hlo" preload="auto" crossorigin="anonymous">
+  <source src="hlo.mp3" type="audio/mpeg">
+
+<audio id="audio_400" preload="auto" crossorigin="anonymous">
+  <source src="400.mp3" type="audio/mpeg">
+
+<audio id="audio_od" preload="auto" crossorigin="anonymous">
+  <source src="od.mp3" type="audio/mpeg">
+
+<audio id="audio_lp" preload="auto" crossorigin="anonymous">
+  <source src="lp.mp3" type="audio/mpeg">
+
+<audio id="audio_love" preload="auto" crossorigin="anonymous">
+  <source src="love.mp3" type="audio/mpeg">
+
+<audio id="audio_gb" preload="auto" crossorigin="anonymous">
+  <source src="gb.mp3" type="audio/mpeg">
+
+<audio id="audio_hd" preload="auto" crossorigin="anonymous">
+  <source src="hd.mp3" type="audio/mpeg">
+
+<audio id="audio_taw" preload="auto" crossorigin="anonymous">
+  <source src="taw.mp3" type="audio/mpeg">
+
+<audio id="audio_sea" preload="auto" crossorigin="anonymous">
+  <source src="sea.mp3" type="audio/mpeg">
+
+
 <script>
 const stage = document.querySelector('.stage');
 const wrap = document.querySelector('.wrap');
@@ -194,56 +231,54 @@ window.addEventListener('resize', fit);
 window.addEventListener('orientationchange', ()=>setTimeout(fit,100));
 
 let currentAudio = null;
-let currentSrc = null;
-// 只在这里标记需要循环的音频
-const loopList = ['400.mp3'];
+// 循环清单
+const loopListId = ['audio_400'];
 
-function bindAudio(el, src){
-  el.onclick = function(){
-    // 点击同一个，关闭
-    if(currentSrc === src){
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
+// 映射：点击元素 -> 对应audio id
+const audioMap = [
+  {el:'.title-img', audioId:'audio_hlo'},
+  {el:'.bq-wrap', audioId:'audio_400'},
+  {el:'.fz-wrap', audioId:'audio_od'},
+  {el:'.mo-wrap', audioId:'audio_lp'},
+  {el:'.ling-wrap', audioId:'audio_love'},
+  {el:'.tz-wrap', audioId:'audio_gb'},
+  {el:'.wb-wrap', audioId:'audio_hd'},
+  {el:'.hh-wrap', audioId:'audio_taw'},
+  {el:'.bqt-wrap', audioId:'audio_sea'},
+];
+
+audioMap.forEach(item=>{
+  const dom = document.querySelector(item.el);
+  const audioDom = document.getElementById(item.audioId);
+  dom.onclick = function(){
+    // 点同一个，暂停
+    if(currentAudio === audioDom){
+      audioDom.pause();
+      audioDom.currentTime = 0;
       currentAudio = null;
-      currentSrc = null;
       return;
     }
-    // 先停掉正在播放的
+    // 停上一个
     if(currentAudio){
       currentAudio.pause();
       currentAudio.currentTime = 0;
       currentAudio = null;
-      currentSrc = null;
     }
-    const audio = new Audio(src);
-    audio.currentTime = 0;
-    audio.play().catch(e=>console.log(src, e));
-    currentAudio = audio;
-    currentSrc = src;
+    audioDom.currentTime = 0;
+    audioDom.play().catch(e=>console.log(item.audioId, e));
+    currentAudio = audioDom;
 
-    audio.onended = function(){
-      if(currentAudio !== audio) return;
-      if(loopList.includes(src)){
-        audio.currentTime = 0;
-        audio.play().catch(e=>console.log(e));
+    audioDom.onended = function(){
+      if(currentAudio !== audioDom) return;
+      if(loopListId.includes(item.audioId)){
+        audioDom.currentTime = 0;
+        audioDom.play().catch(e=>console.log(e));
       }else{
         currentAudio = null;
-        currentSrc = null;
       }
     }
   }
-}
-
-// 全部直接绑定原生元素，没有任何浮层
-bindAudio(document.querySelector('.title-img'), 'hlo.mp3');
-bindAudio(document.querySelector('.bq-wrap'), '400.mp3');
-bindAudio(document.querySelector('.fz-wrap'), 'od.mp3');
-bindAudio(document.querySelector('.mo-wrap'), 'lp.mp3');
-bindAudio(document.querySelector('.ling-wrap'), 'love.mp3');
-bindAudio(document.querySelector('.tz-wrap'), 'gb.mp3');
-bindAudio(document.querySelector('.wb-wrap'), 'hd.mp3');
-bindAudio(document.querySelector('.hh-wrap'), 'taw.mp3');
-bindAudio(document.querySelector('.bqt-wrap'), 'sea.mp3');
+})
 </script>
 </body>
 </html>
