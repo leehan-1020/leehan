@@ -1,313 +1,262 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Leehan · sweet whispers</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<title>Leehan · A Return Letter from the Little Fish</title>
+<link rel="stylesheet" href="https://fontsapi.zeoseven.com/192/main/result.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{
-  background:#f5f1ea;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#fffff0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family: "Yozai", system-ui, sans-serif;
+  font-weight:500;
 }
-/* 和行程页、leehan2完全一致的外层page规则 */
-@media (max-width:767px) {
-  html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-  }
-  body{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .page{
-    position:relative;
-    width:100%;
-    aspect-ratio: 960 / 1707;
-    overflow:hidden;
-  }
+/* 外层只负责居中，不决定比例 */
+.stage{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  max-width:960px;
+  max-height:1707px;
 }
-@media (min-width:768px) {
-  html,body{
-    overflow-y:auto;
-  }
-  .page{
-    position:relative;
-    width:480px;
-    margin:30px auto;
-    height: calc(480px * 1707 / 960);
-    overflow:hidden;
-  }
-}
-/* 内层固定画布，所有px定位基准在这里，完全不变 */
-.inner-canvas{
+/* 真正锁比例的容器 */
+.wrap{
   position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  aspect-ratio:960/1707;
+  overflow:hidden;
+  background:#fffff0;
+  transform-origin:top left;
+}
+/* 内部缩放层：把 960x1707 等比塞进当前可用区域 */
+.inner{
+  position:absolute;
+  top:0;
+  left:0;
   width:960px;
   height:1707px;
-  transform-origin: top left;
+  transform-origin:top left;
 }
-.bg{
-  width:960px;
-  height:1707px;
-  display:block;
-}
-
-@keyframes jellyPop {
-  0%   { transform: scale(1); }
-  25%  { transform: scale(0.92); }
-  45%  { transform: scale(1.06); }
-  65%  { transform: scale(0.98); }
-  80%  { transform: scale(1.02); }
-  100% { transform: scale(1); }
-}
-@keyframes jellyPopSoft {
-  0%   { transform: scale(1); }
-  30%  { transform: scale(0.96); }
-  55%  { transform: scale(1); }
-  80%  { transform: scale(0.99); }
-  100% { transform: scale(1); }
-}
-.jelly{
-  animation: jellyPop 0.45s cubic-bezier(0.42, 0, 0.28, 1.4) both;
-  transform-origin: center center;
-}
-.jelly-soft{
-  animation: jellyPopSoft 0.4s cubic-bezier(0.42, 0, 0.32, 1.3) both;
-  transform-origin: center center;
-}
-.sticker{
+/* 底图 */
+.bg-img{position:absolute;inset:0;z-index:0}
+.bg-img img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+/* 标题：y=-2px */
+.title-img{
   position:absolute;
+  width:calc(67% - 100px);
+  top:12%;
+  left:50%;
+  transform:translate(-50%, -2px);
+  z-index:4;
+  cursor:pointer;
+  transition: transform 0.18s ease-out;
+  touch-action: manipulation;
+}
+.title-img:active{
+  transform: translate(-50%, -2px) scale(0.96);
+}
+.title-img img{width:100%;object-fit:contain;display:block}
+/* 顶部小字：top25px、font-size24px不变 */
+.top-title-small{position:absolute;top:25px;left:20px;color:#555;font-size:24px;letter-spacing:1px;z-index:5}
+/* 右上角 1020 */
+.top-right-num{
+  position:absolute;
+  top:24px;
+  right:32px;
+  color:#555;
+  font-size:21px;
+  z-index:5;
+  background:rgba(255,255,240,0.87);
+  padding:4px 10px;
+  border-radius:12px;
+}
+/* 桐儇记录 top366 不变 */
+.sub-tip{
+  position:absolute;
+  top:366px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:27px;
+  color:#6B4F4B;
+  letter-spacing:1px;
+  white-space:nowrap;
+  z-index:5;
+}
+/* 0000.png 保持 top480、宽度157.5px不变 */
+.zero-wrap{
+  position:absolute;
+  top:480px;
+  left:50%;
+  transform:translateX(-50%);
+  width:157.5px;
+  z-index:4;
+}
+.zero-wrap img{width:100%;object-fit:contain;display:block}
+/* go-btn：top440，right30，尺寸76×76不变 */
+.go-btn{
+  position:absolute;
+  right:30px;
+  top:440px;
+  width:76px;
+  height:76px;
+  transform:translateY(-50%);
   cursor:pointer;
   z-index:10;
-  will-change: transform;
+  transition: transform 0.18s ease-out;
+  touch-action: manipulation;
 }
-.sticker:hover{
-  transform: scale(1.04);
+.go-btn:active{
+  transform: translateY(-50%) scale(0.96);
 }
-
-.name-title-wrap{
-  top:250px;
-  left:175px;
-  width:640px;
+.go-btn img{width:100%;height:100%;object-fit:contain;display:block}
+/* 贴纸容器 可点击贴纸统一回弹效果 */
+.sticky-wrap{position:absolute;inset:0;z-index:2;overflow:hidden}
+.sticker-item{
   position:absolute;
-  pointer-events:none;
+  cursor:pointer;
+  transition: transform 0.18s ease-out;
+  touch-action: manipulation;
 }
-#title{
+.sticker-item:active{
+  transform: scale(0.96);
+}
+.sticker-item img{
   width:100%;
-  height:auto;
-  pointer-events:auto;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  pointer-events: none;
 }
-
-.g1{
-  top:236px;
-  left:208px;
-  width:190px;
-  z-index:11;
+/* hh：width:362.5px，top:611px，left:35px */
+.hh-wrap{width:362.5px;height:auto;top:611px;left:35px}
+/* wb：width:434px，top:713px，right:79px */
+.wb-wrap{width:434px;height:auto;top:713px;right:79px}
+/* bqt：342px，top:996px，right:538px */
+.bqt-wrap{width:342px;height:auto;top:996px;right:538px}
+/* bq：430px，top:925px，right:51px */
+.bq-wrap{width:430px;height:auto;top:925px;right:51px}
+/* tz：235px，top:1250px */
+.tz-wrap{width:235px;height:auto;top:1250px;left:50%;transform:translateX(-50%)}
+.tz-wrap:active{
+  transform: translateX(-50%) scale(0.96) !important;
 }
-.g2{
-  top:234px;
-  left:410px;
-  width:190px;
-  z-index:11;
-}
-.g3{
-  top:232px;
-  left:612px;
-  width:190px;
-  z-index:11;
-}
-.note{
-  top:716px;
-  left:610px;
-  width:288px;
-}
-.music-card{
-  top:845px;
-  left:60px;
-  width:460px;
-}
-.snow-bear{
-  top:1310px;
-  left:520px;
-  width:360px;
-}
+/* fz：bottom:73px，scale0.84 */
+.fz-wrap{width:319px;height:auto;left:39px;bottom:73px;transform:scale(0.84);transform-origin:left bottom}
+/* mo：left:373，bottom:100，scale0.9 */
+.mo-wrap{width:216px;height:auto;left:373px;bottom:100px;transform:scale(0.9);transform-origin:left bottom}
+/* ling：scale:0.978，right:19，bottom:66 */
+.ling-wrap{width:317px;height:auto;right:19px;bottom:66px;transform:scale(0.978);transform-origin:right bottom}
 </style>
 </head>
 <body>
-<div class="page">
-  <div class="inner-canvas" id="canvas">
-    <img class="bg" src="bg.webp" alt="bg">
-
-    <div class="name-title-wrap">
-      <img class="sticker" id="title" src="titel.webp" alt="Leehan">
-    </div>
-
-    <img class="sticker g1" id="g1" src="1.webp" alt="红框眼镜豚鼠">
-    <img class="sticker g2" id="g2" src="2.webp" alt="炸毛豚鼠">
-    <img class="sticker g3" id="g3" src="3.webp" alt="头巾爱心豚鼠">
-
-    <img class="sticker note" id="noteImg" src="xtitel.webp" alt="D.M便签">
-    <img class="sticker music-card" id="musicBox" src="player.webp" alt="小熊白兔播放器">
-    <img class="sticker snow-bear" id="snowBear" src="only.webp" alt="雪地小熊">
+ <div class="stage">
+  <div class="wrap">
+    <div class="inner">
+       <div class="bg-img">
+        <img src="bg.png" alt="background" />
+      </div>
+       <div class="title-img">
+        <img src="titel.webp" alt="Leehan" />
+       </div>
+       <div class="top-title-small">A Return Letter from the Little Fish</div>
+      <div class="top-right-num">1020</div>
+      <div class="sub-tip">*此为桐儇dm记录</div>
+       <!-- 新增 0000.png 位置不动 -->
+      <div class="zero-wrap">
+        <img src="0000.png" alt="0000">
+      </div>
+       <!-- 跳转链接修改为 leehan2.html -->
+      <a class="go-btn" href="leehan2.html">
+        <img src="go.png" alt="go" />
+      </a>
+       <div class="sticky-wrap">
+        <div class="sticker-item hh-wrap"><img src="hh.png" /></div>
+        <div class="sticker-item wb-wrap"><img src="wb.png" alt="对话气泡" /></div>
+        <div class="sticker-item bqt-wrap"><img src="bqt.png" /></div>
+        <div class="sticker-item bq-wrap"><img src="bq.png" /></div>
+        <div class="sticker-item tz-wrap"><img src="tz.png" alt="网格纸条" /></div>
+        <div class="sticker-item fz-wrap"><img src="fz.png" /></div>
+        <div class="sticker-item mo-wrap"><img src="mo.png" /></div>
+        <div class="sticker-item ling-wrap"><img src="ling.png" /></div>
+      </div>
+     </div>
   </div>
 </div>
+ <script>
+/* 真正按比例缩放 */
+const stage = document.querySelector('.stage');
+const wrap = document.querySelector('.wrap');
+const inner = document.querySelector('.inner');
 
-<script>
-// 自动缩放画布，和leehan2保持一致
-function resizeCanvas(){
-  const page = document.querySelector('.page');
-  const canvas = document.getElementById('canvas');
-  const scaleX = page.clientWidth / 960;
-  const scaleY = page.clientHeight / 1707;
-  canvas.style.transform = `scale(${scaleX}, ${scaleY})`;
-}
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
+function fit(){
+  const sw = stage.clientWidth;
+  const sh = stage.clientHeight;
+  const scale = Math.min(sw / 960, sh / 1707);
 
-function triggerJelly(el, soft = false) {
-  el.classList.remove('jelly', 'jelly-soft');
-  void el.offsetWidth;
-  el.classList.add(soft ? 'jelly-soft' : 'jelly');
-}
+  wrap.style.width = (960 * scale) + 'px';
+  wrap.style.height = (1707 * scale) + 'px';
+  wrap.style.left = ((sw - 960 * scale) / 2) + 'px';
+  wrap.style.top = ((sh - 1707 * scale) / 2) + 'px';
 
-const soundList = {
-  g1: "onedoor.mp3",
-  g2: "lp.mp3",
-  g3: "woaini.mp3",
-  noteImg: "hlo.mp3",
-  snowBear: "na.mp3",
-  title: "xsy.mp3",
-  musicBox: "lon.mp3"
-};
-// 需要持久保存进度的循环BGM
-const loopBgIds = ["snowBear", "musicBox"];
-const audioMap = {};
-const playingState = {};
-
-let noteIsXx = false;
-const noteImgSrc1 = "xtitel.webp";
-const noteImgSrc2 = "xxtitel.webp";
-
-// 每个BGM独立storage key，互不覆盖
-function getKey(id){
-  return "bg_audio_" + id;
+  inner.style.transform = `scale(${scale})`;
 }
 
-// 保存单条BGM状态
-function saveBgState(id){
-  if(!loopBgIds.includes(id)) return;
-  const audio = audioMap[id];
-  if(!audio) return;
-  localStorage.setItem(getKey(id), JSON.stringify({
-    currentTime: audio.currentTime,
-    playing: playingState[id]
-  }));
-}
+fit();
+window.addEventListener('resize', fit);
+window.addEventListener('orientationchange', ()=>setTimeout(fit,100));
 
-// 恢复单条BGM
-function restoreBg(id){
-  const str = localStorage.getItem(getKey(id));
-  if(!str) return;
-  const data = JSON.parse(str);
-  if(!audioMap[id]){
-    const a = new Audio(soundList[id]);
-    a.loop = true;
-    audioMap[id] = a;
-    playingState[id] = false;
-  }
-  const audio = audioMap[id];
-  audio.addEventListener('loadedmetadata', ()=>{
-    audio.currentTime = data.currentTime;
-    if(data.playing){
-      audio.play().catch(e=>{});
-      playingState[id] = true;
+// 全局：当前播放音频
+let currentAudio = null;
+
+// 通用互斥绑定函数
+function bindAudio(el, src, loop = false){
+  const audio = new Audio(src);
+  audio.loop = loop;
+  el.onclick = function(){
+    // 有正在播放的，先停掉
+    if(currentAudio){
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
     }
-  }, {once:true});
-}
-
-function toggleSound(id){
-  // 短音效：一次性播放，不影响BGM
-  if(!loopBgIds.includes(id)){
-    const s = new Audio(soundList[id]);
-    s.play().catch(e=>{});
-    return;
+    // 点同一个：关闭
+    if(currentAudio === audio){
+      currentAudio = null;
+      return;
+    }
+    audio.currentTime = 0;
+    audio.play().catch(()=>{});
+    currentAudio = audio;
+    audio.onended = ()=>{
+      if(currentAudio === audio) currentAudio = null;
+    }
   }
-  // BGM切换播放暂停
-  if(!audioMap[id]){
-    const a = new Audio(soundList[id]);
-    a.loop = true;
-    audioMap[id] = a;
-    playingState[id] = false;
-  }
-  const audio = audioMap[id];
-  if(playingState[id]){
-    audio.pause();
-    playingState[id] = false;
-  }else{
-    audio.play().catch(e=>{});
-    playingState[id] = true;
-  }
-  saveBgState(id);
 }
 
-// 定时自动保存两个BGM进度
-setInterval(()=>{
-  loopBgIds.forEach(id=>saveBgState(id));
-},300);
-
-// 页面加载，恢复两个BGM
-window.onload = ()=>{
-  loopBgIds.forEach(id=>restoreBg(id));
-};
-
-const g1 = document.getElementById('g1');
-const g2 = document.getElementById('g2');
-const g3 = document.getElementById('g3');
-const noteImg = document.getElementById("noteImg");
-const snowBear = document.getElementById("snowBear");
-const title = document.getElementById('title');
-const musicBox = document.getElementById("musicBox");
-
-g1.onclick = ()=>{
-  triggerJelly(g1);
-  toggleSound("g1");
-}
-g2.onclick = ()=>{
-  triggerJelly(g2);
-  toggleSound("g2");
-}
-g3.onclick = ()=>{
-  triggerJelly(g3);
-  toggleSound("g3");
-}
-
-// 标题：播放音效，跳转leehan2
-title.onclick = () => {
-  triggerJelly(title, true);
-  const titleAudio = new Audio(soundList.title);
-  titleAudio.play().catch(e=>{});
-  titleAudio.onended = function(){
-    location.href = "leehan2.html";
-  }
-};
-
-noteImg.onclick = ()=>{
-  triggerJelly(noteImg);
-  noteIsXx = !noteIsXx;
-  noteImg.src = noteIsXx ? noteImgSrc2 : noteImgSrc1;
-  toggleSound("noteImg");
-}
-
-snowBear.onclick = ()=>{
-  triggerJelly(snowBear);
-  toggleSound("snowBear");
-}
-musicBox.onclick = ()=>{
-  triggerJelly(musicBox);
-  toggleSound("musicBox");
-}
+// 标题
+bindAudio(document.querySelector('.title-img'), 'hlo.MP3', false);
+// bq 现在也纳入统一互斥
+bindAudio(document.querySelector('.bq-wrap'), '400.MP3', true);
+// 其余贴纸
+bindAudio(document.querySelector('.fz-wrap'), 'od.mp3', false);
+bindAudio(document.querySelector('.mo-wrap'), 'lp.mp3', false);
+bindAudio(document.querySelector('.ling-wrap'), 'love.mp3', false);
+bindAudio(document.querySelector('.tz-wrap'), 'gb.mp3', false);
+bindAudio(document.querySelector('.wb-wrap'), 'hd.mp3', false);
+bindAudio(document.querySelector('.hh-wrap'), 'taw.mp3', false);
+bindAudio(document.querySelector('.bqt-wrap'), 'sea.mp3', false);
 </script>
+
 </body>
 </html>
-

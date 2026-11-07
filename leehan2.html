@@ -7,130 +7,206 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{
-  background:#f5f1ea;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#FFFFF0;
 }
-/* 行程页同款媒体查询，锁定960 / 1707 */
-@media (max-width:767px) {
-  html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-  }
-  body{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .page{
-    position:relative;
-    width:100%;
-    aspect-ratio: 960 / 1707;
-    overflow:hidden;
-  }
+
+.viewport{
+  width:100vw;
+  height:100vh;
+  position:relative;
+  background:#FFFFF0;
 }
-@media (min-width:768px) {
-  html,body{
-    overflow-y:auto;
-  }
-  .page{
-    position:relative;
-    width:480px;
-    margin:30px auto;
-    height: calc(480px * 1707 / 960);
-    overflow:hidden;
-  }
-}
-/* 内层画布：固定960×1707，等比缩放填满外层page！重点！ */
-.inner-canvas{
+
+.canvas{
   position:absolute;
   width:960px;
   height:1707px;
-  background:url("xbg.webp") no-repeat center;
-  background-size:960px 1707px;
-  transform-origin: top left;
+  transform-origin:0 0;
 }
-.oct-img,
+
+.xbg{
+  position:absolute;
+  top:0;
+  left:0;
+  width:960px;
+  height:1707px;
+  object-fit:contain;
+  display:block;
+}
+
 .plate,
 .mc-cup,
-.nov-text,
-.home-gif{
+.home-gif,
+.text-box-1,
+.text-box-2{
   position:absolute;
   object-fit:contain;
 }
-/* 👇 你的原图定位，完全原样，一个数字没改！ */
-.oct-img{
-  width:250px; left:196px; top:260px; z-index:3;
-}
+
 .cake-wrap{
-  position:absolute; width:240px; left:334px;
-  transform:translateX(-50%); top:150px; z-index:2;
-}
-.cake{ width:100%; cursor:pointer; }
-.plate{
-  width:300px; height:300px; transform:rotate(0deg);
-  left:180px; top:200px; z-index:1;
-}
-.mc-cup{
-  width:290px; left:596px; top:504px; z-index:3; cursor:pointer;
-}
-.nov-text{
-  width:240px; left:624px; top:600px; z-index:3;
-}
-.home-gif{
-  width:140px; right:56px; top:40px; left:auto; z-index:3; cursor:pointer;
+  position:absolute;
+  width:259px;
+  left:260px;
+  transform:translateX(-50%);
+  top:170px;
+  z-index:2;
 }
 
-/* Q弹点击 */
+.cake{
+  width:100%;
+  cursor:pointer;
+}
+
+.plate{
+  width:300px; height:300px; transform:rotate(0deg);
+  left:115px; top:240px; z-index:1;
+}
+
+.mc-cup{
+  width:290px; left:611px; top:539px; z-index:3; cursor:pointer;
+}
+
+.home-gif{
+  width:140px; right:51px; top:45px; left:auto; z-index:3; cursor:pointer;
+}
+
+.text-box-1{
+  width:448px;
+  aspect-ratio:6/2;
+  left:335px;
+  top:270px;
+  background:#FFFFE0;
+  border-radius:12px;
+  padding:12px;
+  color:#8b7976;
+  outline:none;
+  border:1px solid #e2dcd0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  padding-left:115px;
+}
+.text-box-1 strong{
+  font-size:39px;
+  display:block;
+  color:#8b7976;
+  letter-spacing:2px;
+}
+.text-box-1 span{
+  font-size:19px;
+  margin-top:4px;
+}
+
+.text-box-2{
+  width:448px;
+  aspect-ratio:6/2;
+  left:244px;
+  top:620px;
+  background:#FFFFE0;
+  border-radius:12px;
+  padding:12px;
+  color:#8b7976;
+  outline:none;
+  border:1px solid #e2dcd0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  padding-left:115px;
+}
+.text-inner-right{
+  text-align:right;
+  margin-left:-41px;
+}
+.text-box-2 strong{
+  font-size:34px;
+  display:block;
+  color:#8b7976;
+  letter-spacing:2px;
+}
+.text-box-2 span{
+  font-size:19px;
+  margin-top:4px;
+}
+
 .click-item{
   transform-style:preserve-3d;
   transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1), filter 0.35s ease;
   transform:translateZ(0);
   filter:drop-shadow(0 10px 18px rgba(0,0,0,0.18));
 }
+
 .click-item:active{
   transform:translateZ(40px) scale(1.08);
   filter:drop-shadow(0 18px 30px rgba(0,0,0,0.35));
 }
 
-/* 淡入转场 */
 .fade-overlay{
   position:fixed; inset:0; background:#ffffff; z-index:9999;
   opacity:0; pointer-events:none; transition:opacity 0.32s ease-in-out;
 }
+
 .fade-overlay.active{ opacity:1; pointer-events:auto; }
 </style>
 </head>
 <body>
 <div class="fade-overlay" id="fadeOverlay"></div>
 
-<div class="page">
-  <div class="inner-canvas" id="canvas">
-    <img class="oct-img" src="oct.webp" alt="标题">
+<div class="viewport">
+  <div class="canvas" id="canvas">
+    <img class="xbg" src="xbg.webp" alt="背景">
+
     <div class="cake-wrap">
       <img class="cake click-item" src="ck.webp" alt="蛋糕" data-link="leehan3.html">
     </div>
+
     <img class="plate" src="pz.webp" alt="播放器">
     <img class="mc-cup click-item" src="mc.webp" alt="杯子" data-link="cup.html">
-    <img class="nov-text" src="nov.webp" alt="nov文字">
     <img class="home-gif click-item" src="home.gif" alt="返回主页" data-link="leehan.html">
+
+    <!-- 原来的文本框1 -->
+    <div class="text-box-1">
+      <strong>october</strong>
+      <span>Enter the birthday month</span>
+    </div>
+    <!-- 新增文本框2 -->
+    <div class="text-box-2">
+      <div class="text-inner-right">
+        <strong>December</strong>
+        <span>The season of autumn grows deep</span>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-// 自动计算缩放比例，让960*1707画布刚好填满外层page
+const canvasDom = document.getElementById('canvas');
+const viewport = document.querySelector('.viewport');
+const baseW = 960;
+const baseH = 1707;
+
 function resizeCanvas(){
-  const page = document.querySelector('.page');
-  const canvas = document.getElementById('canvas');
-  const scaleX = page.clientWidth / 960;
-  const scaleY = page.clientHeight / 1707;
-  canvas.style.transform = `scale(${scaleX}, ${scaleY})`;
+  const vw = viewport.clientWidth;
+  const vh = viewport.clientHeight;
+  const scaleW = vw / baseW;
+  const scaleH = vh / baseH;
+  const scale = Math.min(scaleW, scaleH);
+  const offsetX = (vw - baseW * scale) / 2;
+  const offsetY = (vh - baseH * scale) / 2;
+  canvasDom.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
 }
+
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
+window.addEventListener('orientationchange', ()=>setTimeout(resizeCanvas,100));
 
-// 跳转淡入
 const overlay = document.getElementById('fadeOverlay');
 const clickItems = document.querySelectorAll('.click-item');
+
 clickItems.forEach(item => {
   item.addEventListener('click', function () {
     const targetUrl = this.dataset.link;
@@ -138,94 +214,6 @@ clickItems.forEach(item => {
     setTimeout(() => { location.href = targetUrl; }, 320);
   });
 });
-
-// ========== 音频模块 ==========
-function triggerJelly(el, soft = false) {
-  el.classList.remove('jelly', 'jelly-soft');
-  void el.offsetWidth;
-  el.classList.add(soft ? 'jelly-soft' : 'jelly');
-}
-
-const soundList = {
-  g1: "onedoor.mp3",
-  g2: "lp.mp3",
-  g3: "woaini.mp3",
-  noteImg: "hlo.mp3",
-  snowBear: "na.mp3",
-  title: "xsy.mp3",
-  musicBox: "lon.mp3"
-};
-const loopBgIds = ["snowBear", "musicBox"];
-const audioMap = {};
-const playingState = {};
-
-function getKey(id){
-  return "bg_audio_" + id;
-}
-
-function saveBgState(id){
-  if(!loopBgIds.includes(id)) return;
-  const audio = audioMap[id];
-  if(!audio) return;
-  localStorage.setItem(getKey(id), JSON.stringify({
-    currentTime: audio.currentTime,
-    playing: playingState[id]
-  }));
-}
-
-function restoreBg(id){
-  const str = localStorage.getItem(getKey(id));
-  if(!str) return;
-  const data = JSON.parse(str);
-  if(!audioMap[id]){
-    const a = new Audio(soundList[id]);
-    a.loop = true;
-    audioMap[id] = a;
-    playingState[id] = false;
-  }
-  const audio = audioMap[id];
-  audio.addEventListener('loadedmetadata', ()=>{
-    audio.currentTime = data.currentTime;
-    if(data.playing){
-      audio.play().catch(e=>{});
-      playingState[id] = true;
-    }
-  }, {once:true});
-}
-
-function toggleSound(id){
-  // 短音效：一次性播放，不存状态
-  if(!loopBgIds.includes(id)){
-    const s = new Audio(soundList[id]);
-    s.play().catch(e=>{});
-    return;
-  }
-  if(!audioMap[id]){
-    const a = new Audio(soundList[id]);
-    a.loop = true;
-    audioMap[id] = a;
-    playingState[id] = false;
-  }
-  const audio = audioMap[id];
-  if(playingState[id]){
-    audio.pause();
-    playingState[id] = false;
-  }else{
-    audio.play().catch(e=>{});
-    playingState[id] = true;
-  }
-  saveBgState(id);
-}
-
-setInterval(()=>{
-  loopBgIds.forEach(id=>saveBgState(id));
-},300);
-
-// ✅ 合并onload！先缩放已经执行过了，这里只恢复音频
-window.addEventListener('load', ()=>{
-  loopBgIds.forEach(id=>restoreBg(id));
-});
 </script>
 </body>
 </html>
-
